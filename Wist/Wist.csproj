@@ -9,8 +9,15 @@
 
     <ItemGroup>
       <None Update="CodeExamples\BinarySearch">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="CodeExamples\Calc">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Frontend\" />
     </ItemGroup>
 
 </Project>

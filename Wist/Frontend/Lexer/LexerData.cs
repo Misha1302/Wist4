@@ -1,13 +1,13 @@
 ﻿namespace Wist.Lexer;
 
-using Wist.Lexer.Lexemes;
 using static Lexemes.LexemeType;
+using Ld = Wist.Lexer.Lexemes.LexemeDeclaration;
 
 public static class LexerData
 {
-    public static List<LexemeDeclaration> GetLexemeDeclarations()
+    public static List<Ld> GetLexemeDeclarations()
     {
-        var lds = new List<LexemeDeclaration>
+        var lds = new List<Ld>
         {
             new(LeftPar, "\\("),
             new(RightPar, "\\)"),
@@ -27,7 +27,6 @@ public static class LexerData
             new(Int64, "-?\\d+l"),
             new(Dot, "\\."),
             new(Plus, "\\+"),
-            new(Minus, "\\-"),
             new(Mul, "\\*"),
             new(Div, "/"),
             new(If, "if"),
@@ -42,13 +41,14 @@ public static class LexerData
             new(GreaterOrEquals, @"\>\="),
             new(Equal, "="),
             new(NotEqual, "!="),
-            new(Comma, ",")
+            new(Comma, ","),
+            new(Minus, @"\-")
         };
 
-        lds.Insert(0, new LexemeDeclaration(Pointer, $"{lds.Get(NativeType).Pattern}\\*"));
-        lds.Insert(0, new LexemeDeclaration(FunctionCall, $"{lds.Get(Identifier).Pattern}(?=({lds.Get(LeftPar).Pattern}))"));
-        lds.Insert(0, new LexemeDeclaration(Label, $"{lds.Get(Identifier).Pattern}:"));
-        lds.Insert(0, new LexemeDeclaration(Goto, $"goto (?=({lds.Get(Identifier).Pattern}))"));
+        lds.Insert(0, new Ld(Pointer, $"{lds.Get(NativeType).Pattern}\\*"));
+        lds.Insert(0, new Ld(FunctionCall, $"{lds.Get(Identifier).Pattern}(?=({lds.Get(LeftPar).Pattern}))"));
+        lds.Insert(0, new Ld(Label, $"{lds.Get(Identifier).Pattern}:"));
+        lds.Insert(0, new Ld(Goto, $"goto (?=({lds.Get(Identifier).Pattern}))"));
 
         return lds;
     }

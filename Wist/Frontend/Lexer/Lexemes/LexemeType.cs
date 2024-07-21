@@ -1,4 +1,4 @@
-﻿namespace Wist.Lexer.Lexemes;
+﻿namespace Wist.Frontend.Lexer.Lexemes;
 
 public enum LexemeType
 {
@@ -39,5 +39,8 @@ public enum LexemeType
     GreaterThen,
     GreaterOrEquals,
     Equal,
-    NotEqual
+    NotEqual,
+
+
+    Scope
 }

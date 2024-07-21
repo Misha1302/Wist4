@@ -1,7 +1,7 @@
-﻿namespace Wist.Lexer;
+﻿namespace Wist.Frontend.Lexer;
 
 using static Lexemes.LexemeType;
-using Ld = Wist.Lexer.Lexemes.LexemeDeclaration;
+using Ld = Wist.Frontend.Lexer.Lexemes.LexemeDeclaration;
 
 public static class LexerData
 {
@@ -45,7 +45,7 @@ public static class LexerData
             new(Minus, @"\-")
         };
 
-        lds.Insert(0, new Ld(Pointer, $"{lds.Get(NativeType).Pattern}\\*"));
+        lds.Insert(0, new Ld(Pointer, $"{lds.Get(Identifier).Pattern}\\*"));
         lds.Insert(0, new Ld(FunctionCall, $"{lds.Get(Identifier).Pattern}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Label, $"{lds.Get(Identifier).Pattern}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({lds.Get(Identifier).Pattern}))"));

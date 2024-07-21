@@ -1,6 +1,6 @@
-﻿namespace Wist.Lexer;
+﻿namespace Wist.Frontend.Lexer;
 
-using Wist.Lexer.Lexemes;
+using Wist.Frontend.Lexer.Lexemes;
 
 public static class LexerExtensions
 {

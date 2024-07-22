@@ -14,6 +14,8 @@ public static class Program
         var lexemes = lexer.Lexeme();
 
         var astMaker = new AbstractSyntaxTreeMaker(lexemes);
-        Console.WriteLine(astMaker.GetAstRoot());
+        var astRoot = astMaker.GetAstRoot();
+
+        Console.WriteLine(astRoot);
     }
 }

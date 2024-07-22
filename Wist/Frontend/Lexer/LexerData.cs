@@ -42,7 +42,7 @@ public static class LexerData
             new(NotEqual, "!="),
             new(Comma, ","),
             new(Minus, @"\-"),
-            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
+            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*")
         };
 
         lds.Insert(0, new Ld(PointerType, $"{lds.Get(Identifier).Pattern}\\*"));

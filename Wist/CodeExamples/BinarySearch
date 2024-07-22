@@ -13,13 +13,13 @@ int64* Arr()
     int64 arrLen = 6
     int64* arr = Std.Malloc(arrLen * sizeof(int64) + 1) + sizeof(int64)
     
-    arr[-1] = arrLen 
-    arr[0] = -9l
-    arr[1] = -6l
-    arr[2] = 2l 
-    arr[3] = 5l  
-    arr[4] = 87l 
-    arr[5] = 123l
+    *(arr + -1 * sizeof(int64)) = arrLen 
+    *(arr + 0 * sizeof(int64)) = -9l
+    *(arr + 1 * sizeof(int64)) = -6l
+    *(arr + 2 * sizeof(int64)) = 2l 
+    *(arr + 3 * sizeof(int64)) = 5l  
+    *(arr + 4 * sizeof(int64)) = 87l 
+    *(arr + 5 * sizeof(int64)) = 123l
     
     ret arr
 }

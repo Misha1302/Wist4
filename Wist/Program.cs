@@ -12,7 +12,6 @@ public static class Program
 
         var lexer = new Lexer(source);
         var lexemes = lexer.Lexeme();
-        Console.WriteLine(string.Join("\n", lexemes));
 
         var astMaker = new AbstractSyntaxTreeMaker(lexemes);
         Console.WriteLine(astMaker.GetAstRoot());

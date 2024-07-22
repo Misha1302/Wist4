@@ -18,10 +18,9 @@ public static class LexerData
             new(Import, "import"),
             new(String, "\"[^\"]+\""),
             new(As, "as"),
-            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
+            new(NativeType, "(int64|int32|int16|float64)"),
             new(Alias, "alias"),
             new(Is, "is"),
-            new(NativeType, "(int64|int32|int16|double)"),
             new(Set, "="),
             new(Int32, "-?\\d+"),
             new(Int64, "-?\\d+l"),
@@ -42,10 +41,11 @@ public static class LexerData
             new(Equal, "="),
             new(NotEqual, "!="),
             new(Comma, ","),
-            new(Minus, @"\-")
+            new(Minus, @"\-"),
+            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
         };
 
-        lds.Insert(0, new Ld(Pointer, $"{lds.Get(Identifier).Pattern}\\*"));
+        lds.Insert(0, new Ld(PointerType, $"{lds.Get(Identifier).Pattern}\\*"));
         lds.Insert(0, new Ld(FunctionCall, $"{lds.Get(Identifier).Pattern}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Label, $"{lds.Get(Identifier).Pattern}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({lds.Get(Identifier).Pattern}))"));

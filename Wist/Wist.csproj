@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="CodeExamples\BinarySearch">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="CodeExamples\Calc">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="CodeExamples\BinarySearch">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="CodeExamples\Calc">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

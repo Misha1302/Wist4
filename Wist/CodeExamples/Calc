@@ -1,1 +1,2 @@
-int_64* arr = malloc(8 * 10 + 8) + 8
+float64 x = 8 * (3 + 7) + 8) + 8
+writeln(x)

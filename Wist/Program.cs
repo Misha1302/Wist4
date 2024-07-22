@@ -17,5 +17,8 @@ public static class Program
         var astRoot = astMaker.GetAstRoot();
 
         Console.WriteLine(astRoot);
+        
+        var astExecutor = new AstExecutor();
+        astExecutor.Execute(astRoot);
     }
 }

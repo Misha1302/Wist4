@@ -26,7 +26,7 @@ public class Lexer(string source)
             lexemes.Add(new Lexeme(match.decl.LexemeType, match.match.Value));
         }
 
-        lexemes.RemoveAll(x => x.LexemeType == LexemeType.Spaces);
+        lexemes.RemoveAll(x => x.LexemeType is LexemeType.Spaces or LexemeType.NewLine);
         return lexemes;
     }
 }

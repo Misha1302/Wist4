@@ -36,7 +36,7 @@ public enum LexemeType
     Comma,
     LessThan,
     LessOrEquals,
-    GreaterThen,
+    GreaterThan,
     GreaterOrEquals,
     Equal,
     NotEqual,

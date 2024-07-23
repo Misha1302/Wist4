@@ -1,4 +1,4 @@
-namespace Wist;
+namespace Wist.Frontend;
 
 using Wist.Logger;
 

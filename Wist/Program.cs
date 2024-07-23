@@ -1,8 +1,11 @@
 ﻿namespace Wist;
 
+using Wist.Backend;
+using Wist.Frontend;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer;
 using Wist.Logger;
+using Wist.MiddleEnd;
 
 public static class Program
 {
@@ -18,6 +21,13 @@ public static class Program
         var astMaker = new AbstractSyntaxTreeMaker(lexemes, logger);
         var astRoot = astMaker.GetAstRoot();
 
-        Console.WriteLine(astRoot);
+        var astOptimizer = new AstOptimizerStub();
+        var optimizedRoot = astOptimizer.OptimizeAst(astRoot);
+
+        var compiler = new AstCompilerToAsm(logger);
+        var executable = compiler.Compile(optimizedRoot);
+
+        var result = executable.Execute();
+        Console.WriteLine(result);
     }
 }

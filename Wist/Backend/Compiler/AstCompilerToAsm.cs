@@ -25,15 +25,29 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
     private Assembler _assembler = null!;
     private readonly List<(Label, long)> _dataLabels = [];
+    private Dictionary<string, int> _variables = [];
 
     public IExecutable Compile(AstNode root)
     {
         _assembler = new Assembler(64);
         EmitEnter();
+        EmitStack(root);
         EmitBase();
         Emit(root);
         EmitData();
         return new AsmExecutable(_assembler, logger);
+    }
+
+    private void EmitStack(AstNode root)
+    {
+        var variablesSet = new HashSet<string>();
+        new AstVisitor().Visit(root, node =>
+        {
+            if (node.Lexeme.LexemeType == LexemeType.Set)
+                variablesSet.Add(node.Children[0].Lexeme.Text);
+        });
+        _variables = variablesSet.Select((x, i) => (x, (i + 1) * 8)).ToDictionary();
+        _assembler.sub(rsp, (variablesSet.Count + variablesSet.Count % 2) * 8);
     }
 
     private void EmitEnter()
@@ -73,92 +87,114 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
         _assembler.mov(rcx, 2048);
         _assembler.call(BuildinFunctions.CallocPtr);
         _assembler.mov(r12, rax);
-
         _assembler.mov(r13, 0);
-
         _assembler.mov(r14, 0);
     }
 
     private void Emit(AstNode root)
     {
-        foreach (var child in root.Children)
-            Emit(child);
-
-        switch (root.Lexeme.LexemeType)
+        new AstVisitor().Visit(root, node =>
         {
-            case LexemeType.Int64:
-                var label = _assembler.CreateLabel($"i64_{root.Lexeme.Text}");
-                _dataLabels.Add((label, long.Parse(root.Lexeme.Text)));
-                _assembler.mov(r14, __[label]);
-                _assembler.mov(__[r12 + r13], r14);
-                _assembler.add(r13, 8);
-                break;
-            case LexemeType.Plus:
-                _assembler.mov(r14, __[r12 + r13 - 8]);
-                _assembler.add(__[r12 + r13 - 16], r14);
-                _assembler.sub(r13, 8);
-                break;
-            case LexemeType.Minus:
-                _assembler.mov(r14, __[r12 + r13 - 8]);
-                _assembler.sub(__[r12 + r13 - 16], r14);
-                _assembler.sub(r13, 8);
-                break;
-            case LexemeType.Mul:
-                _assembler.mov(rax, __[r12 + r13 - 16]);
-                _assembler.mov(r14, __[r12 + r13 - 8]);
-                _assembler.imul(r14);
-                _assembler.mov(__[r12 + r13 - 16], rax);
-                _assembler.sub(r13, 8);
-                break;
-            case LexemeType.Div:
-                _assembler.mov(rdx, 0);
-                _assembler.mov(rax, __[r12 + r13 - 16]);
-                _assembler.mov(r14, __[r12 + r13 - 8]);
-                _assembler.idiv(r14);
-                _assembler.mov(__[r12 + r13 - 16], rax);
-                _assembler.sub(r13, 8);
-                break;
-            case LexemeType.Ret:
-                _assembler.mov(rax, __[r12 + r13 - 8]);
-                EmitLeave();
-                _assembler.ret();
-                break;
-            case LexemeType.Scope:
-                break;
-            case LexemeType.Import:
-            case LexemeType.String:
-            case LexemeType.As:
-            case LexemeType.Identifier:
-            case LexemeType.Alias:
-            case LexemeType.Is:
-            case LexemeType.NativeType:
-            case LexemeType.PointerType:
-            case LexemeType.Set:
-            case LexemeType.FunctionCall:
-            case LexemeType.LeftPar:
-            case LexemeType.RightPar:
-            case LexemeType.LeftBrace:
-            case LexemeType.RightBrace:
-            case LexemeType.Int32:
-            case LexemeType.LeftRectangle:
-            case LexemeType.RightRectangle:
-            case LexemeType.Dot:
-            case LexemeType.If:
-            case LexemeType.Elif:
-            case LexemeType.Else:
-            case LexemeType.Label:
-            case LexemeType.Goto:
-            case LexemeType.Spaces:
-            case LexemeType.NewLine:
-            case LexemeType.Comma:
-            case LexemeType.LessThan:
-            case LexemeType.LessOrEquals:
-            case LexemeType.GreaterThan:
-            case LexemeType.GreaterOrEquals:
-            case LexemeType.Equal:
-            case LexemeType.NotEqual:
-            default:
-                throw new ArgumentOutOfRangeException(root.Lexeme.Text);
-        }
+            switch (node.Lexeme.LexemeType)
+            {
+                case LexemeType.Int64:
+                    var label = _assembler.CreateLabel($"i64_{node.Lexeme.Text}");
+                    _dataLabels.Add((label, long.Parse(node.Lexeme.Text)));
+                    _assembler.mov(r14, __[label]);
+                    _assembler.mov(__[r12 + r13], r14);
+                    _assembler.add(r13, 8);
+                    break;
+                case LexemeType.Plus:
+                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    _assembler.add(__[r12 + r13 - 16], r14);
+                    _assembler.sub(r13, 8);
+                    break;
+                case LexemeType.Minus:
+                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    _assembler.sub(__[r12 + r13 - 16], r14);
+                    _assembler.sub(r13, 8);
+                    break;
+                case LexemeType.Mul:
+                    _assembler.mov(rax, __[r12 + r13 - 16]);
+                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    _assembler.imul(r14);
+                    _assembler.mov(__[r12 + r13 - 16], rax);
+                    _assembler.sub(r13, 8);
+                    break;
+                case LexemeType.Div:
+                    _assembler.mov(rdx, 0);
+                    _assembler.mov(rax, __[r12 + r13 - 16]);
+                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    _assembler.idiv(r14);
+                    _assembler.mov(__[r12 + r13 - 16], rax);
+                    _assembler.sub(r13, 8);
+                    break;
+                case LexemeType.Ret:
+                    _assembler.mov(rax, __[r12 + r13 - 8]);
+                    EmitLeave();
+                    _assembler.ret();
+                    break;
+                case LexemeType.Identifier:
+                    if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
+                    {
+                        // push address of variable
+                        _assembler.mov(r14, rbp);
+                        _assembler.sub(r14, _variables[node.Lexeme.Text]);
+                        _assembler.mov(__[r12 + r13], r14);
+                        _assembler.adc(r13, 8);
+                    }
+                    else
+                    {
+                        // push the value of variable
+                        _assembler.mov(r14, __[rbp - _variables[node.Lexeme.Text]]);
+                        _assembler.mov(__[r12 + r13], r14);
+                        _assembler.adc(r13, 8);
+                    }
+
+                    break;
+                case LexemeType.Set:
+                    // left - address - r15, right - value -  r14
+                    _assembler.sub(r13, 8);
+                    _assembler.mov(r14, __[r12 + r13]);
+                    _assembler.sub(r13, 8);
+                    _assembler.mov(r15, __[r12 + r13]);
+                    _assembler.mov(__[r15], r14);
+                    break;
+                case LexemeType.NativeType:
+                case LexemeType.Scope:
+                    break;
+                case LexemeType.Import:
+                case LexemeType.String:
+                case LexemeType.As:
+                case LexemeType.Alias:
+                case LexemeType.Is:
+                case LexemeType.PointerType:
+                case LexemeType.FunctionCall:
+                case LexemeType.LeftPar:
+                case LexemeType.RightPar:
+                case LexemeType.LeftBrace:
+                case LexemeType.RightBrace:
+                case LexemeType.Int32:
+                case LexemeType.LeftRectangle:
+                case LexemeType.RightRectangle:
+                case LexemeType.Dot:
+                case LexemeType.If:
+                case LexemeType.Elif:
+                case LexemeType.Else:
+                case LexemeType.Label:
+                case LexemeType.Goto:
+                case LexemeType.Spaces:
+                case LexemeType.NewLine:
+                case LexemeType.Comma:
+                case LexemeType.LessThan:
+                case LexemeType.LessOrEquals:
+                case LexemeType.GreaterThan:
+                case LexemeType.GreaterOrEquals:
+                case LexemeType.Equal:
+                case LexemeType.NotEqual:
+                default:
+                    throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
+            }
+        });
     }
 }

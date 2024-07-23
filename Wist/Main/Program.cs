@@ -1,4 +1,4 @@
-﻿namespace Wist;
+﻿namespace Wist.Main;
 
 using Wist.Backend.Compiler;
 using Wist.Frontend;

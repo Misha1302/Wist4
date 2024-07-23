@@ -1,22 +1,9 @@
 ﻿namespace Wist.Logger;
 
-public class FileLogger : ILogger
+public class FileLogger : StandardLoggerBase
 {
-    public FileLogger()
+    public FileLogger(string filePathToLog = "logs.txt") : base(msg => File.AppendAllText(filePathToLog, msg))
     {
-        File.WriteAllText("logs.txt", "");
-    }
-
-    public void Log(string msg, string filePath = "", int lineNumber = 0)
-    {
-        File.AppendAllText("logs.txt", MakeLogMessage());
-
-        string MakeLogMessage()
-        {
-            var prefix = $"path: '{filePath}'; line: {lineNumber}; ";
-            if (msg.Contains('\n'))
-                return prefix + $"\n{msg}";
-            return prefix + msg;
-        }
+        File.WriteAllText(filePathToLog, "");
     }
 }

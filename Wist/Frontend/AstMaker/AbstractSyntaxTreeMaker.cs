@@ -1,8 +1,9 @@
 ﻿namespace Wist.Frontend.AstMaker;
 
 using Wist.Frontend.Lexer.Lexemes;
+using Wist.Logger;
 
-public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes)
+public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
 {
     private AstNode _root = null!;
 
@@ -18,6 +19,7 @@ public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes)
         MakeParsScopes(0);
         MakeChildrenForFunctions(_root.Children);
         MakeOperationsNodes(_root.Children, 0);
+        logger.Log(_root.ToString());
 
         return _root;
     }

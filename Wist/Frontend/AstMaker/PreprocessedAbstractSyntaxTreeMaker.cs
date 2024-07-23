@@ -9,7 +9,11 @@ public static class PreprocessedAbstractSyntaxTreeMaker
         [LexemeType.NativeType, LexemeType.PointerType],
         [LexemeType.Mul, LexemeType.Div],
         [LexemeType.Plus, LexemeType.Minus],
-        [LexemeType.Set]
+        [LexemeType.Equal, LexemeType.NotEqual],
+        [LexemeType.LessThan, LexemeType.GreaterThan, LexemeType.LessOrEquals, LexemeType.GreaterOrEquals],
+        [LexemeType.Set],
+        [LexemeType.Elif, LexemeType.Else],
+        [LexemeType.If]
     ];
 
     public static void MakeOperationsNodes(List<AstNode> astNodes, int lexemeIndex)
@@ -37,25 +41,42 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                     case LexemeType.Div:
                     case LexemeType.Mul:
                     case LexemeType.Plus:
+                    case LexemeType.Equal:
+                    case LexemeType.NotEqual:
+                    case LexemeType.LessThan:
+                    case LexemeType.LessOrEquals:
+                    case LexemeType.GreaterThan:
+                    case LexemeType.GreaterOrEquals:
                         if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i - 1, i + 1);
                         i--;
                         break;
                     case LexemeType.If:
+                        if (curNode.Children.Count != 0) continue;
+                        var indicesToInclude = (List<int>) [i + 1, i + 2];
+                        int j;
+                        for (j = 3;
+                             i + j < astNodes.Count &&
+                             astNodes[i + j].Lexeme.LexemeType is LexemeType.Else or LexemeType.Elif;
+                             j++)
+                            indicesToInclude.Add(i + j);
+
+                        curNode.AddAndRemove(astNodes, indicesToInclude.ToArray());
+                        break;
                     case LexemeType.Elif:
+                        if (curNode.Children.Count != 0) continue;
+                        curNode.AddAndRemove(astNodes, i + 1, i + 2);
+                        break;
                     case LexemeType.Else:
+                        if (curNode.Children.Count != 0) continue;
+                        curNode.AddAndRemove(astNodes, i + 1);
+                        break;
                     case LexemeType.Label:
                     case LexemeType.Goto:
                     case LexemeType.Ret:
                     case LexemeType.Spaces:
                     case LexemeType.NewLine:
                     case LexemeType.Comma:
-                    case LexemeType.LessThan:
-                    case LexemeType.LessOrEquals:
-                    case LexemeType.GreaterThen:
-                    case LexemeType.GreaterOrEquals:
-                    case LexemeType.Equal:
-                    case LexemeType.NotEqual:
                     case LexemeType.Scope:
                     case LexemeType.Import:
                     case LexemeType.String:

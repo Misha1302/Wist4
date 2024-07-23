@@ -2,8 +2,9 @@
 
 using System.Text.RegularExpressions;
 using Wist.Frontend.Lexer.Lexemes;
+using Wist.Logger;
 
-public class Lexer(string source)
+public class Lexer(string source, ILogger logger)
 {
     private readonly List<LexemeDeclaration> _lexemeDeclarations = LexerData.GetLexemeDeclarations();
 
@@ -26,7 +27,8 @@ public class Lexer(string source)
             lexemes.Add(new Lexeme(match.decl.LexemeType, match.match.Value));
         }
 
-        lexemes.RemoveAll(x => x.LexemeType == LexemeType.Spaces);
+        lexemes.RemoveAll(x => x.LexemeType is LexemeType.Spaces or LexemeType.NewLine);
+        logger.Log(string.Join("\n", lexemes));
         return lexemes;
     }
 }

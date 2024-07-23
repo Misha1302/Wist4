@@ -13,7 +13,7 @@ public static class AsmPrinter
             NumberBase = NumberBase.Decimal,
             MemorySizeOptions = MemorySizeOptions.Default,
             DecimalDigitGroupSize = 3,
-            DigitSeparator = "`"
+            DigitSeparator = "'"
         });
         foreach (var i in asm.Instructions)
         {

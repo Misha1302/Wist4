@@ -1,6 +1,6 @@
 ﻿namespace Wist;
 
-using Wist.Backend;
+using Wist.Backend.Compiler;
 using Wist.Frontend;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer;

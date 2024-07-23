@@ -1,4 +1,4 @@
-namespace Wist.Backend;
+namespace Wist.Backend.Executing;
 
 public interface IExecutable
 {

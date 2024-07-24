@@ -40,6 +40,7 @@ public enum LexemeType
     GreaterOrEquals,
     Equal,
     NotEqual,
+    Negation,
 
 
     Scope

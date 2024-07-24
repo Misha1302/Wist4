@@ -17,6 +17,7 @@ public static class LexerData
             new(RightRectangle, "\\]"),
             new(LessOrEquals, @"\<\="),
             new(GreaterOrEquals, @"\>\="),
+            new(Negation, "!"),
             new(NotEqual, "!="),
             new(Equal, "=="),
             new(Import, "import"),

@@ -1,9 +1,22 @@
 int64 a = 5
 int64 b = readI64()
 
+if (a < b)
+(
+    writeI64(-1)
+)
 if (a == b)
 (
-    ret 5
+    writeI64(0)
+)
+if (a > b)
+(
+    writeI64(1)
 )
 
-ret 7
+if (!a == b)
+(
+    writeI64(3)
+)
+
+ret 0

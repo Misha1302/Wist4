@@ -11,6 +11,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
         [LexemeType.Plus, LexemeType.Minus],
         [LexemeType.Equal, LexemeType.NotEqual],
         [LexemeType.LessThan, LexemeType.GreaterThan, LexemeType.LessOrEquals, LexemeType.GreaterOrEquals],
+        [LexemeType.Negation],
         [LexemeType.Set],
         [LexemeType.Elif, LexemeType.Else],
         [LexemeType.If],
@@ -73,6 +74,10 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;
                     case LexemeType.Ret:
+                        if (curNode.Children.Count != 0) continue;
+                        curNode.AddAndRemove(astNodes, i + 1);
+                        break;
+                    case LexemeType.Negation:
                         if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;

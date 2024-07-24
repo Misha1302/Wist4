@@ -167,8 +167,8 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
                     pop(rcx);
 
-                var needToPopStub = _sp % 16 != 0;
-                if (_sp % 16 != 0) pushStub();
+                var needToPushPopStub = _sp % 16 != 0;
+                if (needToPushPopStub) pushStub();
 
                 _assembler.sub(rsp, 32);
                 if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
@@ -178,30 +178,51 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 else throw new InvalidOperationException($"Unknown function {node.Lexeme.Text}");
                 _assembler.add(rsp, 32);
 
-                if (needToPopStub) popStub();
+                if (needToPushPopStub) popStub();
 
                 if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
 
                 break;
             case LexemeType.Equal:
-                _assembler.pop(r14);
-                _assembler.cmp(__[rsp], r14);
-                _assembler.mov(r14, 0);
-                _assembler.mov(r15, 1);
-                _assembler.cmove(r14, r15);
-                _assembler.push(r14);
+                LogicOp(_assembler.cmove);
+                break;
+            case LexemeType.LessThan:
+                LogicOp(_assembler.cmovl);
+                break;
+            case LexemeType.LessOrEquals:
+                LogicOp(_assembler.cmovle);
+                break;
+            case LexemeType.GreaterThan:
+                LogicOp(_assembler.cmovg);
+                break;
+            case LexemeType.GreaterOrEquals:
+                LogicOp(_assembler.cmovge);
+                break;
+            case LexemeType.NotEqual:
+                LogicOp(_assembler.cmovne);
                 break;
             case LexemeType.If:
                 _astVisitor.Visit(node.Children[0], EmitMainLoop, NeedToVisitChildren);
 
-                _assembler.pop(r14);
+                pop(r14);
                 var notIf = _assembler.CreateLabel("not_if");
-                _assembler.cmp(r14, 1);
-                _assembler.jne(notIf);
+                _assembler.cmp(r14, 0);
+                _assembler.je(notIf);
 
                 _astVisitor.Visit(node.Children[1], EmitMainLoop, NeedToVisitChildren);
 
                 _assembler.Label(ref notIf);
+                break;
+            case LexemeType.Negation:
+                pop(r14);
+                _assembler.mov(r13, 0);
+                _assembler.mov(r15, 1);
+
+                _assembler.cmp(r14, 0);
+                _assembler.cmove(r14, r15);
+                _assembler.cmovne(r14, r13);
+
+                push(r14);
                 break;
             case LexemeType.NativeType:
             case LexemeType.Scope:
@@ -227,14 +248,19 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
             case LexemeType.Spaces:
             case LexemeType.NewLine:
             case LexemeType.Comma:
-            case LexemeType.LessThan:
-            case LexemeType.LessOrEquals:
-            case LexemeType.GreaterThan:
-            case LexemeType.GreaterOrEquals:
-            case LexemeType.NotEqual:
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
         }
+    }
+
+    private void LogicOp(Action<AssemblerRegister64, AssemblerRegister64> asmOp)
+    {
+        pop(r14);
+        _assembler.cmp(__[rsp], r14);
+        _assembler.mov(r14, 0);
+        _assembler.mov(r15, 1);
+        asmOp(r14, r15);
+        push(r14);
     }
 
     // ReSharper disable once InconsistentNaming

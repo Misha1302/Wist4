@@ -17,17 +17,21 @@ public partial class AsmExecutable(Assembler asm, ILogger logger) : IExecutable
         return functionPointer();
     }
 
+    public byte[] ToBinary()
+    {
+        var stream = new MemoryStream();
+        asm.Assemble(new StreamCodeWriter(stream), 0);
+        return stream.ToArray();
+    }
+
     [LibraryImport("kernel32.dll", SetLastError = true)]
     private static partial IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
 
     private unsafe delegate*<T> MakeFunction<T>()
     {
-        const ulong rip = 0x10;
-        var stream = new MemoryStream();
-        asm.Assemble(new StreamCodeWriter(stream), rip);
-
-        var ptr = VirtualAlloc(IntPtr.Zero, (uint)stream.Length, MemCommit, PageExecuteReadwrite);
-        Marshal.Copy(stream.ToArray(), 0, ptr, (int)stream.Length);
+        var bin = ToBinary();
+        var ptr = VirtualAlloc(IntPtr.Zero, (uint)bin.Length, MemCommit, PageExecuteReadwrite);
+        Marshal.Copy(bin, 0, ptr, bin.Length);
 
         return (delegate*<T>)ptr;
     }

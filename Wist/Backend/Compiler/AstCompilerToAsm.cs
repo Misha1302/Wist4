@@ -20,12 +20,14 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
 
     in this compiler:
-    r12 - stack pointer, r13 - stack offset, r14 - temporally calculations
+    data transferring via stack
+
+    r13, r14, r15 - temporally calculations
     */
 
     private Assembler _assembler = null!;
-    private readonly List<(Label, long)> _dataLabels = [];
     private Dictionary<string, int> _variables = [];
+    private int _sp;
 
     public IExecutable Compile(AstNode root)
     {
@@ -34,7 +36,6 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
         EmitStack(root);
         EmitBase();
         Emit(root);
-        EmitData();
         return new AsmExecutable(_assembler, logger);
     }
 
@@ -54,11 +55,27 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     {
         // 'cause of stack alignment we need to push odd count of registers
         _assembler.push(rbp);
-        _assembler.push(r12);
         _assembler.push(r13);
         _assembler.push(r14);
         _assembler.push(r15);
+        _assembler.push(r15);
         _assembler.mov(rbp, rsp);
+
+        /*
+        push 2 // 0
+        push 4 // -8
+        call x // -16
+
+        x:
+            push rbp // -24
+            mov rbp, rsp
+
+            // 16 - arg0, +8 - argX
+            mov r10, [rbp + 16] // 4
+            mov r11, [rbp + 24] // 2
+
+            pop rbp
+        */
     }
 
 
@@ -66,29 +83,17 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     {
         _assembler.mov(rsp, rbp);
         _assembler.pop(r15);
+        _assembler.pop(r15);
         _assembler.pop(r14);
         _assembler.pop(r13);
-        _assembler.pop(r12);
         _assembler.pop(rbp);
-    }
-
-    private void EmitData()
-    {
-        foreach (var tuple in _dataLabels)
-        {
-            var valueTuple = tuple;
-            _assembler.Label(ref valueTuple.Item1);
-            _assembler.dq(valueTuple.Item2);
-        }
     }
 
     private void EmitBase()
     {
-        _assembler.mov(rcx, 2048);
-        _assembler.call(BuildinFunctions.CallocPtr);
-        _assembler.mov(r12, rax);
         _assembler.mov(r13, 0);
         _assembler.mov(r14, 0);
+        _assembler.mov(r15, 0);
     }
 
     private void Emit(AstNode root)
@@ -98,67 +103,76 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
             switch (node.Lexeme.LexemeType)
             {
                 case LexemeType.Int64:
-                    var label = _assembler.CreateLabel($"i64_{node.Lexeme.Text}");
-                    _dataLabels.Add((label, long.Parse(node.Lexeme.Text)));
-                    _assembler.mov(r14, __[label]);
-                    _assembler.mov(__[r12 + r13], r14);
-                    _assembler.add(r13, 8);
+                    _assembler.mov(r14, long.Parse(node.Lexeme.Text));
+                    push(r14);
                     break;
                 case LexemeType.Plus:
-                    _assembler.mov(r14, __[r12 + r13 - 8]);
-                    _assembler.add(__[r12 + r13 - 16], r14);
-                    _assembler.sub(r13, 8);
+                    pop(r14);
+                    _assembler.add(__[rsp], r14);
                     break;
                 case LexemeType.Minus:
-                    _assembler.mov(r14, __[r12 + r13 - 8]);
-                    _assembler.sub(__[r12 + r13 - 16], r14);
-                    _assembler.sub(r13, 8);
+                    pop(r14);
+                    _assembler.sub(__[rsp], r14);
                     break;
                 case LexemeType.Mul:
-                    _assembler.mov(rax, __[r12 + r13 - 16]);
-                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    pop(r14);
+                    pop(rax);
                     _assembler.imul(r14);
-                    _assembler.mov(__[r12 + r13 - 16], rax);
-                    _assembler.sub(r13, 8);
+                    push(rax);
                     break;
                 case LexemeType.Div:
                     _assembler.mov(rdx, 0);
-                    _assembler.mov(rax, __[r12 + r13 - 16]);
-                    _assembler.mov(r14, __[r12 + r13 - 8]);
+                    pop(r14);
+                    pop(rax);
                     _assembler.idiv(r14);
-                    _assembler.mov(__[r12 + r13 - 16], rax);
-                    _assembler.sub(r13, 8);
+                    push(rax);
                     break;
                 case LexemeType.Ret:
-                    _assembler.mov(rax, __[r12 + r13 - 8]);
+                    pop(rax);
                     EmitLeave();
                     _assembler.ret();
                     break;
                 case LexemeType.Identifier:
                     if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
                     {
-                        // push address of variable
+                        // load variable reference
                         _assembler.mov(r14, rbp);
                         _assembler.sub(r14, _variables[node.Lexeme.Text]);
-                        _assembler.mov(__[r12 + r13], r14);
-                        _assembler.adc(r13, 8);
+                        push(r14);
                     }
                     else
                     {
                         // push the value of variable
                         _assembler.mov(r14, __[rbp - _variables[node.Lexeme.Text]]);
-                        _assembler.mov(__[r12 + r13], r14);
-                        _assembler.adc(r13, 8);
+                        push(r14);
                     }
 
                     break;
                 case LexemeType.Set:
                     // left - address - r15, right - value -  r14
-                    _assembler.sub(r13, 8);
-                    _assembler.mov(r14, __[r12 + r13]);
-                    _assembler.sub(r13, 8);
-                    _assembler.mov(r15, __[r12 + r13]);
+                    pop(r14);
+                    pop(r15);
                     _assembler.mov(__[r15], r14);
+                    break;
+                case LexemeType.FunctionCall:
+                    if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
+                        pop(rcx);
+
+                    var needToPopStub = _sp % 16 != 0;
+                    if (_sp % 16 != 0) pushStub();
+
+                    _assembler.sub(rsp, 32);
+                    if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
+                    else if (node.Lexeme.Text == "readI64") _assembler.call(BuildinFunctions.ReadI64Ptr);
+                    else if (node.Lexeme.Text == "calloc") _assembler.call(BuildinFunctions.CallocPtr);
+                    else if (node.Lexeme.Text == "free") _assembler.call(BuildinFunctions.FreePtr);
+                    else throw new InvalidOperationException($"Unknown function {node.Lexeme.Text}");
+                    _assembler.add(rsp, 32);
+                    
+                    if (needToPopStub) popStub();
+
+                    if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
+
                     break;
                 case LexemeType.NativeType:
                 case LexemeType.Scope:
@@ -169,7 +183,6 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 case LexemeType.Alias:
                 case LexemeType.Is:
                 case LexemeType.PointerType:
-                case LexemeType.FunctionCall:
                 case LexemeType.LeftPar:
                 case LexemeType.RightPar:
                 case LexemeType.LeftBrace:
@@ -196,5 +209,33 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                     throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
             }
         });
+    }
+
+    // ReSharper disable once InconsistentNaming
+    private void popStub()
+    {
+        _sp -= 8;
+        _assembler.add(rsp, 8);
+    }
+
+    // ReSharper disable once InconsistentNaming
+    private void pushStub()
+    {
+        _sp += 8;
+        _assembler.sub(rsp, 8);
+    }
+
+    // ReSharper disable once InconsistentNaming
+    private void pop(AssemblerRegister64 register)
+    {
+        _sp -= 8;
+        _assembler.pop(register);
+    }
+
+    // ReSharper disable once InconsistentNaming
+    private void push(AssemblerRegister64 register)
+    {
+        _sp += 8;
+        _assembler.push(register);
     }
 }

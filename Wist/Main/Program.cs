@@ -11,6 +11,11 @@ public static class Program
 {
     public static void Main()
     {
+        Execute();
+    }
+
+    private static void Execute()
+    {
         var logger = new FileLogger();
         var sourceCodeReader = new SourceCodeReader(logger);
         var source = sourceCodeReader.Read("CodeExamples/Calc");
@@ -27,7 +32,10 @@ public static class Program
         var compiler = new AstCompilerToAsm(logger);
         var executable = compiler.Compile(optimizedRoot);
 
+        File.WriteAllBytes("program.bin", executable.ToBinary());
+
         var result = executable.Execute();
+
         Console.WriteLine(result);
     }
 }

@@ -41,6 +41,7 @@ public enum LexemeType
     Equal,
     NotEqual,
     Negation,
+    For,
 
 
     Scope

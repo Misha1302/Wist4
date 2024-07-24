@@ -37,6 +37,7 @@ public static class LexerData
             new(Elif, "elif"),
             new(Else, "else"),
             new(Ret, "ret"),
+            new(For, "for"),
             new(Spaces, "[ \t]+"),
             new(NewLine, "\r?\n"),
             new(LessThan, "\\<"),

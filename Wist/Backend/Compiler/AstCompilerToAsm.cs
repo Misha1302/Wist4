@@ -50,14 +50,14 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 if (node.Lexeme.LexemeType == Set)
                     variablesSet.Add(node.Children[0].Lexeme.Text);
             },
-            NeedToVisitChildren
+            _ => true
         );
         _variables = variablesSet.Select((x, i) => (x, (i + 1) * 8)).ToDictionary();
         _assembler.sub(rsp, (variablesSet.Count + variablesSet.Count % 2) * 8);
     }
 
     private static bool NeedToVisitChildren(AstNode node) =>
-        node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto;
+        node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto and not For;
 
     private void EmitEnter()
     {
@@ -111,6 +111,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
     private void EmitMainLoop(AstNode node)
     {
+        Label notIf;
         switch (node.Lexeme.LexemeType)
         {
             case Int64:
@@ -166,7 +167,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 _assembler.mov(__[r15], r14);
                 break;
             case FunctionCall:
-                if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
+                if (node.Lexeme.Text is "writeI64" or "writeI64NoLn" or "calloc" or "free")
                     pop(rcx);
 
                 var needToPushPopStub = _sp % 16 != 0;
@@ -174,6 +175,8 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
                 _assembler.sub(rsp, 32);
                 if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
+                else if (node.Lexeme.Text == "writeI64NoLn") _assembler.call(BuildinFunctions.WriteI64NoLnPtr);
+                else if (node.Lexeme.Text == "writeLn") _assembler.call(BuildinFunctions.WriteLnPtr);
                 else if (node.Lexeme.Text == "readI64") _assembler.call(BuildinFunctions.ReadI64Ptr);
                 else if (node.Lexeme.Text == "calloc") _assembler.call(BuildinFunctions.CallocPtr);
                 else if (node.Lexeme.Text == "free") _assembler.call(BuildinFunctions.FreePtr);
@@ -203,11 +206,60 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
             case NotEqual:
                 LogicOp(_assembler.cmovne);
                 break;
+            case For:
+                /*
+                int64 i = 0
+
+                while_start:
+
+                if (!(i < 10)) ( goto while_end )
+
+                body
+
+                i = i + 1
+
+                goto while_start
+
+                while_end:
+                */
+
+                var whileEnd = _assembler.CreateLabel("while_end");
+
+                // int64 i = 0
+                _astVisitor.Visit(node.Children[0], EmitMainLoop, NeedToVisitChildren);
+
+                // while_start:
+                var whileStart = _assembler.CreateLabel("while_start");
+                _assembler.Label(ref whileStart);
+
+                // if (i < 10 == false) ( goto while_end )
+                notIf = _assembler.CreateLabel("while_start");
+
+                // condition
+                _astVisitor.Visit(node.Children[1], EmitMainLoop, NeedToVisitChildren);
+                pop(r14);
+                _assembler.cmp(r14, 0);
+                _assembler.jne(notIf);
+
+                _assembler.jmp(whileEnd);
+                _assembler.Label(ref notIf);
+
+                // body
+                _astVisitor.Visit(node.Children[3], EmitMainLoop, NeedToVisitChildren);
+
+                // i = i + 1
+                _astVisitor.Visit(node.Children[2], EmitMainLoop, NeedToVisitChildren);
+
+                // goto while_start
+                _assembler.jmp(whileStart);
+
+                _assembler.Label(ref whileEnd);
+                break;
             case If:
                 _astVisitor.Visit(node.Children[0], EmitMainLoop, NeedToVisitChildren);
 
                 pop(r14);
-                var notIf = _assembler.CreateLabel("not_if");
+                notIf = _assembler.CreateLabel("not_if");
                 _assembler.cmp(r14, 0);
                 _assembler.je(notIf);
 

@@ -1,13 +1,7 @@
-int64 i = 0
+for (int64 i = 5) (i >= -5) (i = i - 1) ( writeI64NoLn(i) )
+writeLn()
 
-while_start:
-writeI64(i)
+for (int64 i = -5) (i <= 5) (i = i + 1) ( writeI64NoLn(i) )
+writeLn()
 
-i = i + 1
-if (i < 10)
-(
-    goto while_start
-)
-    
-    
-ret i
+ret 0

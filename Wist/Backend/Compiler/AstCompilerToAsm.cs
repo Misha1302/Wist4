@@ -28,6 +28,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     private Assembler _assembler = null!;
     private Dictionary<string, int> _variables = [];
     private int _sp;
+    private readonly AstVisitor _astVisitor = new();
 
     public IExecutable Compile(AstNode root)
     {
@@ -42,14 +43,19 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     private void EmitStack(AstNode root)
     {
         var variablesSet = new HashSet<string>();
-        new AstVisitor().Visit(root, node =>
-        {
-            if (node.Lexeme.LexemeType == LexemeType.Set)
-                variablesSet.Add(node.Children[0].Lexeme.Text);
-        });
+        _astVisitor.Visit(root, node =>
+            {
+                if (node.Lexeme.LexemeType == LexemeType.Set)
+                    variablesSet.Add(node.Children[0].Lexeme.Text);
+            },
+            NeedToVisitChildren
+        );
         _variables = variablesSet.Select((x, i) => (x, (i + 1) * 8)).ToDictionary();
         _assembler.sub(rsp, (variablesSet.Count + variablesSet.Count % 2) * 8);
     }
+
+    private static bool NeedToVisitChildren(AstNode node) =>
+        node.Lexeme.LexemeType is not LexemeType.If and not LexemeType.Elif and not LexemeType.Else;
 
     private void EmitEnter()
     {
@@ -98,117 +104,137 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
     private void Emit(AstNode root)
     {
-        new AstVisitor().Visit(root, node =>
+        _astVisitor.Visit(root, EmitMainLoop, NeedToVisitChildren);
+    }
+
+    private void EmitMainLoop(AstNode node)
+    {
+        switch (node.Lexeme.LexemeType)
         {
-            switch (node.Lexeme.LexemeType)
-            {
-                case LexemeType.Int64:
-                    _assembler.mov(r14, long.Parse(node.Lexeme.Text));
+            case LexemeType.Int64:
+                _assembler.mov(r14, long.Parse(node.Lexeme.Text));
+                push(r14);
+                break;
+            case LexemeType.Plus:
+                pop(r14);
+                _assembler.add(__[rsp], r14);
+                break;
+            case LexemeType.Minus:
+                pop(r14);
+                _assembler.sub(__[rsp], r14);
+                break;
+            case LexemeType.Mul:
+                pop(r14);
+                pop(rax);
+                _assembler.imul(r14);
+                push(rax);
+                break;
+            case LexemeType.Div:
+                _assembler.mov(rdx, 0);
+                pop(r14);
+                pop(rax);
+                _assembler.idiv(r14);
+                push(rax);
+                break;
+            case LexemeType.Ret:
+                pop(rax);
+                EmitLeave();
+                _assembler.ret();
+                break;
+            case LexemeType.Identifier:
+                if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
+                {
+                    // load variable reference
+                    _assembler.mov(r14, rbp);
+                    _assembler.sub(r14, _variables[node.Lexeme.Text]);
                     push(r14);
-                    break;
-                case LexemeType.Plus:
-                    pop(r14);
-                    _assembler.add(__[rsp], r14);
-                    break;
-                case LexemeType.Minus:
-                    pop(r14);
-                    _assembler.sub(__[rsp], r14);
-                    break;
-                case LexemeType.Mul:
-                    pop(r14);
-                    pop(rax);
-                    _assembler.imul(r14);
-                    push(rax);
-                    break;
-                case LexemeType.Div:
-                    _assembler.mov(rdx, 0);
-                    pop(r14);
-                    pop(rax);
-                    _assembler.idiv(r14);
-                    push(rax);
-                    break;
-                case LexemeType.Ret:
-                    pop(rax);
-                    EmitLeave();
-                    _assembler.ret();
-                    break;
-                case LexemeType.Identifier:
-                    if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
-                    {
-                        // load variable reference
-                        _assembler.mov(r14, rbp);
-                        _assembler.sub(r14, _variables[node.Lexeme.Text]);
-                        push(r14);
-                    }
-                    else
-                    {
-                        // push the value of variable
-                        _assembler.mov(r14, __[rbp - _variables[node.Lexeme.Text]]);
-                        push(r14);
-                    }
+                }
+                else
+                {
+                    // push the value of variable
+                    _assembler.mov(r14, __[rbp - _variables[node.Lexeme.Text]]);
+                    push(r14);
+                }
 
-                    break;
-                case LexemeType.Set:
-                    // left - address - r15, right - value -  r14
-                    pop(r14);
-                    pop(r15);
-                    _assembler.mov(__[r15], r14);
-                    break;
-                case LexemeType.FunctionCall:
-                    if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
-                        pop(rcx);
+                break;
+            case LexemeType.Set:
+                // left - address - r15, right - value -  r14
+                pop(r14);
+                pop(r15);
+                _assembler.mov(__[r15], r14);
+                break;
+            case LexemeType.FunctionCall:
+                if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
+                    pop(rcx);
 
-                    var needToPopStub = _sp % 16 != 0;
-                    if (_sp % 16 != 0) pushStub();
+                var needToPopStub = _sp % 16 != 0;
+                if (_sp % 16 != 0) pushStub();
 
-                    _assembler.sub(rsp, 32);
-                    if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
-                    else if (node.Lexeme.Text == "readI64") _assembler.call(BuildinFunctions.ReadI64Ptr);
-                    else if (node.Lexeme.Text == "calloc") _assembler.call(BuildinFunctions.CallocPtr);
-                    else if (node.Lexeme.Text == "free") _assembler.call(BuildinFunctions.FreePtr);
-                    else throw new InvalidOperationException($"Unknown function {node.Lexeme.Text}");
-                    _assembler.add(rsp, 32);
-                    
-                    if (needToPopStub) popStub();
+                _assembler.sub(rsp, 32);
+                if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
+                else if (node.Lexeme.Text == "readI64") _assembler.call(BuildinFunctions.ReadI64Ptr);
+                else if (node.Lexeme.Text == "calloc") _assembler.call(BuildinFunctions.CallocPtr);
+                else if (node.Lexeme.Text == "free") _assembler.call(BuildinFunctions.FreePtr);
+                else throw new InvalidOperationException($"Unknown function {node.Lexeme.Text}");
+                _assembler.add(rsp, 32);
 
-                    if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
+                if (needToPopStub) popStub();
 
-                    break;
-                case LexemeType.NativeType:
-                case LexemeType.Scope:
-                    break;
-                case LexemeType.Import:
-                case LexemeType.String:
-                case LexemeType.As:
-                case LexemeType.Alias:
-                case LexemeType.Is:
-                case LexemeType.PointerType:
-                case LexemeType.LeftPar:
-                case LexemeType.RightPar:
-                case LexemeType.LeftBrace:
-                case LexemeType.RightBrace:
-                case LexemeType.Int32:
-                case LexemeType.LeftRectangle:
-                case LexemeType.RightRectangle:
-                case LexemeType.Dot:
-                case LexemeType.If:
-                case LexemeType.Elif:
-                case LexemeType.Else:
-                case LexemeType.Label:
-                case LexemeType.Goto:
-                case LexemeType.Spaces:
-                case LexemeType.NewLine:
-                case LexemeType.Comma:
-                case LexemeType.LessThan:
-                case LexemeType.LessOrEquals:
-                case LexemeType.GreaterThan:
-                case LexemeType.GreaterOrEquals:
-                case LexemeType.Equal:
-                case LexemeType.NotEqual:
-                default:
-                    throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
-            }
-        });
+                if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
+
+                break;
+            case LexemeType.Equal:
+                _assembler.pop(r14);
+                _assembler.cmp(__[rsp], r14);
+                _assembler.mov(r14, 0);
+                _assembler.mov(r15, 1);
+                _assembler.cmove(r14, r15);
+                _assembler.push(r14);
+                break;
+            case LexemeType.If:
+                _astVisitor.Visit(node.Children[0], EmitMainLoop, NeedToVisitChildren);
+
+                _assembler.pop(r14);
+                var notIf = _assembler.CreateLabel("not_if");
+                _assembler.cmp(r14, 1);
+                _assembler.jne(notIf);
+
+                _astVisitor.Visit(node.Children[1], EmitMainLoop, NeedToVisitChildren);
+
+                _assembler.Label(ref notIf);
+                break;
+            case LexemeType.NativeType:
+            case LexemeType.Scope:
+                break;
+            case LexemeType.Import:
+            case LexemeType.String:
+            case LexemeType.As:
+            case LexemeType.Alias:
+            case LexemeType.Is:
+            case LexemeType.PointerType:
+            case LexemeType.LeftPar:
+            case LexemeType.RightPar:
+            case LexemeType.LeftBrace:
+            case LexemeType.RightBrace:
+            case LexemeType.Int32:
+            case LexemeType.LeftRectangle:
+            case LexemeType.RightRectangle:
+            case LexemeType.Dot:
+            case LexemeType.Elif:
+            case LexemeType.Else:
+            case LexemeType.Label:
+            case LexemeType.Goto:
+            case LexemeType.Spaces:
+            case LexemeType.NewLine:
+            case LexemeType.Comma:
+            case LexemeType.LessThan:
+            case LexemeType.LessOrEquals:
+            case LexemeType.GreaterThan:
+            case LexemeType.GreaterOrEquals:
+            case LexemeType.NotEqual:
+            default:
+                throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
+        }
     }
 
     // ReSharper disable once InconsistentNaming

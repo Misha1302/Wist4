@@ -73,6 +73,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;
                     case LexemeType.Ret:
+                        if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;
                     case LexemeType.Label:

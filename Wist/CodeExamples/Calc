@@ -1,7 +1,12 @@
-for (int64 i = 5) (i >= -5) (i = i - 1) ( writeI64NoLn(i) )
-writeLn()
+import "..\..\..\..\Libraries\net8.0\StandardLibrary.dll"
 
-for (int64 i = -5) (i <= 5) (i = i + 1) ( writeI64NoLn(i) )
-writeLn()
+SetColor(GetRedColor())
+for (int64 i = 5) (i >= -5) (i = i - 1) ( WriteI64NoLn(i) )
+WriteLn()
 
+SetColor(GetCyanColor())
+for (int64 i = -5) (i <= 5) (i = i + 1) ( WriteI64NoLn(i) )
+WriteLn()
+
+SetColor(GetWhiteColor())
 ret 0

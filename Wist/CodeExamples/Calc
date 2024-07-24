@@ -1,22 +1,13 @@
-int64 a = 5
-int64 b = readI64()
+int64 i = 0
 
-if (a < b)
-(
-    writeI64(-1)
-)
-if (a == b)
-(
-    writeI64(0)
-)
-if (a > b)
-(
-    writeI64(1)
-)
+while_start:
+writeI64(i)
 
-if (!a == b)
+i = i + 1
+if (i < 10)
 (
-    writeI64(3)
+    goto while_start
 )
-
-ret 0
+    
+    
+ret i

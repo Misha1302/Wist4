@@ -5,6 +5,7 @@ using Wist.Backend.Executing;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.Logger;
+using static Frontend.Lexer.Lexemes.LexemeType;
 using AsmExecutable = Wist.Backend.Executing.AsmExecutable;
 
 public class AstCompilerToAsm(ILogger logger) : IAstCompiler
@@ -29,6 +30,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     private Dictionary<string, int> _variables = [];
     private int _sp;
     private readonly AstVisitor _astVisitor = new();
+    private readonly Dictionary<string, LabelRef> _labels = [];
 
     public IExecutable Compile(AstNode root)
     {
@@ -45,7 +47,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
         var variablesSet = new HashSet<string>();
         _astVisitor.Visit(root, node =>
             {
-                if (node.Lexeme.LexemeType == LexemeType.Set)
+                if (node.Lexeme.LexemeType == Set)
                     variablesSet.Add(node.Children[0].Lexeme.Text);
             },
             NeedToVisitChildren
@@ -55,7 +57,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     }
 
     private static bool NeedToVisitChildren(AstNode node) =>
-        node.Lexeme.LexemeType is not LexemeType.If and not LexemeType.Elif and not LexemeType.Else;
+        node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto;
 
     private void EmitEnter()
     {
@@ -111,38 +113,38 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     {
         switch (node.Lexeme.LexemeType)
         {
-            case LexemeType.Int64:
+            case Int64:
                 _assembler.mov(r14, long.Parse(node.Lexeme.Text));
                 push(r14);
                 break;
-            case LexemeType.Plus:
+            case Plus:
                 pop(r14);
                 _assembler.add(__[rsp], r14);
                 break;
-            case LexemeType.Minus:
+            case Minus:
                 pop(r14);
                 _assembler.sub(__[rsp], r14);
                 break;
-            case LexemeType.Mul:
+            case Mul:
                 pop(r14);
                 pop(rax);
                 _assembler.imul(r14);
                 push(rax);
                 break;
-            case LexemeType.Div:
+            case Div:
                 _assembler.mov(rdx, 0);
                 pop(r14);
                 pop(rax);
                 _assembler.idiv(r14);
                 push(rax);
                 break;
-            case LexemeType.Ret:
+            case Ret:
                 pop(rax);
                 EmitLeave();
                 _assembler.ret();
                 break;
-            case LexemeType.Identifier:
-                if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
+            case Identifier:
+                if (node.Parent?.Lexeme.LexemeType == Set)
                 {
                     // load variable reference
                     _assembler.mov(r14, rbp);
@@ -157,13 +159,13 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 }
 
                 break;
-            case LexemeType.Set:
+            case Set:
                 // left - address - r15, right - value -  r14
                 pop(r14);
                 pop(r15);
                 _assembler.mov(__[r15], r14);
                 break;
-            case LexemeType.FunctionCall:
+            case FunctionCall:
                 if (node.Lexeme.Text is "writeI64" or "calloc" or "free")
                     pop(rcx);
 
@@ -183,25 +185,25 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
 
                 break;
-            case LexemeType.Equal:
+            case Equal:
                 LogicOp(_assembler.cmove);
                 break;
-            case LexemeType.LessThan:
+            case LessThan:
                 LogicOp(_assembler.cmovl);
                 break;
-            case LexemeType.LessOrEquals:
+            case LessOrEquals:
                 LogicOp(_assembler.cmovle);
                 break;
-            case LexemeType.GreaterThan:
+            case GreaterThan:
                 LogicOp(_assembler.cmovg);
                 break;
-            case LexemeType.GreaterOrEquals:
+            case GreaterOrEquals:
                 LogicOp(_assembler.cmovge);
                 break;
-            case LexemeType.NotEqual:
+            case NotEqual:
                 LogicOp(_assembler.cmovne);
                 break;
-            case LexemeType.If:
+            case If:
                 _astVisitor.Visit(node.Children[0], EmitMainLoop, NeedToVisitChildren);
 
                 pop(r14);
@@ -213,7 +215,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
                 _assembler.Label(ref notIf);
                 break;
-            case LexemeType.Negation:
+            case Negation:
                 pop(r14);
                 _assembler.mov(r13, 0);
                 _assembler.mov(r15, 1);
@@ -224,30 +226,36 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
 
                 push(r14);
                 break;
-            case LexemeType.NativeType:
-            case LexemeType.Scope:
-                break;
-            case LexemeType.Import:
-            case LexemeType.String:
-            case LexemeType.As:
-            case LexemeType.Alias:
-            case LexemeType.Is:
-            case LexemeType.PointerType:
-            case LexemeType.LeftPar:
-            case LexemeType.RightPar:
-            case LexemeType.LeftBrace:
-            case LexemeType.RightBrace:
-            case LexemeType.Int32:
-            case LexemeType.LeftRectangle:
-            case LexemeType.RightRectangle:
-            case LexemeType.Dot:
-            case LexemeType.Elif:
-            case LexemeType.Else:
             case LexemeType.Label:
-            case LexemeType.Goto:
-            case LexemeType.Spaces:
-            case LexemeType.NewLine:
-            case LexemeType.Comma:
+                var labelName = node.Lexeme.Text[..^1]; // skip ':'
+                _labels.Add(labelName, new LabelRef(_assembler.CreateLabel(labelName)));
+                _assembler.Label(ref _labels[labelName].LabelByRef);
+                break;
+            case Goto:
+                _assembler.jmp(_labels[node.Children[0].Lexeme.Text].LabelByRef);
+                break;
+            case NativeType:
+            case Scope:
+                break;
+            case Import:
+            case String:
+            case As:
+            case Alias:
+            case Is:
+            case PointerType:
+            case LeftPar:
+            case RightPar:
+            case LeftBrace:
+            case RightBrace:
+            case Int32:
+            case LeftRectangle:
+            case RightRectangle:
+            case Dot:
+            case Elif:
+            case Else:
+            case Spaces:
+            case NewLine:
+            case Comma:
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
         }
@@ -256,7 +264,8 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     private void LogicOp(Action<AssemblerRegister64, AssemblerRegister64> asmOp)
     {
         pop(r14);
-        _assembler.cmp(__[rsp], r14);
+        pop(r15);
+        _assembler.cmp(r15, r14);
         _assembler.mov(r14, 0);
         _assembler.mov(r15, 1);
         asmOp(r14, r15);

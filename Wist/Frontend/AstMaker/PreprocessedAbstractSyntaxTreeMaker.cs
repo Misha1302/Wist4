@@ -6,7 +6,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
 {
     private static readonly LexemeType[][] _lexemeTypes =
     [
-        [LexemeType.Goto, LexemeType.For],
+        [LexemeType.Goto, LexemeType.For, LexemeType.Import],
         [LexemeType.NativeType, LexemeType.PointerType],
         [LexemeType.Mul, LexemeType.Div],
         [LexemeType.Plus, LexemeType.Minus],
@@ -90,13 +90,16 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                         if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;
+                    case LexemeType.Import:
+                        if (curNode.Children.Count != 0) continue;
+                        curNode.AddAndRemove(astNodes, i + 1);
+                        break;
                     case LexemeType.Label:
                         break;
                     case LexemeType.Spaces:
                     case LexemeType.NewLine:
                     case LexemeType.Comma:
                     case LexemeType.Scope:
-                    case LexemeType.Import:
                     case LexemeType.String:
                     case LexemeType.As:
                     case LexemeType.Identifier:

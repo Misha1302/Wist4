@@ -31,6 +31,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     private int _sp;
     private readonly AstVisitor _astVisitor = new();
     private readonly Dictionary<string, LabelRef> _labels = [];
+    private readonly DllsManager _dllsManager = new();
 
     public IExecutable Compile(AstNode root)
     {
@@ -57,7 +58,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
     }
 
     private static bool NeedToVisitChildren(AstNode node) =>
-        node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto and not For;
+        node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto and not For and not Import;
 
     private void EmitEnter()
     {
@@ -167,26 +168,23 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
                 _assembler.mov(__[r15], r14);
                 break;
             case FunctionCall:
-                if (node.Lexeme.Text is "writeI64" or "writeI64NoLn" or "calloc" or "free")
-                    pop(rcx);
+                var funcToCall = _dllsManager.GetPointerOf(node.Lexeme.Text);
+
+                if (funcToCall.parameters.Length >= 1) pop(rcx);
+                if (funcToCall.parameters.Length >= 2) pop(rdx);
+                if (funcToCall.parameters.Length >= 3) pop(r8);
+                if (funcToCall.parameters.Length >= 4) pop(r9);
 
                 var needToPushPopStub = _sp % 16 != 0;
                 if (needToPushPopStub) pushStub();
 
                 _assembler.sub(rsp, 32);
-                if (node.Lexeme.Text == "writeI64") _assembler.call(BuildinFunctions.WriteI64Ptr);
-                else if (node.Lexeme.Text == "writeI64NoLn") _assembler.call(BuildinFunctions.WriteI64NoLnPtr);
-                else if (node.Lexeme.Text == "writeLn") _assembler.call(BuildinFunctions.WriteLnPtr);
-                else if (node.Lexeme.Text == "readI64") _assembler.call(BuildinFunctions.ReadI64Ptr);
-                else if (node.Lexeme.Text == "calloc") _assembler.call(BuildinFunctions.CallocPtr);
-                else if (node.Lexeme.Text == "free") _assembler.call(BuildinFunctions.FreePtr);
-                else throw new InvalidOperationException($"Unknown function {node.Lexeme.Text}");
+                _assembler.call((ulong)funcToCall.ptr);
                 _assembler.add(rsp, 32);
 
                 if (needToPushPopStub) popStub();
 
-                if (node.Lexeme.Text is "calloc" or "readI64") push(rax);
-
+                if (funcToCall.returnType != typeof(void)) push(rax);
                 break;
             case Equal:
                 LogicOp(_assembler.cmove);
@@ -290,6 +288,8 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
             case Scope:
                 break;
             case Import:
+                _dllsManager.Import(node.Children[0].Lexeme.Text[1..^1]);
+                break;
             case String:
             case As:
             case Alias:

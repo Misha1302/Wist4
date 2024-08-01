@@ -284,7 +284,7 @@ public class AstCompilerToAsm(ILogger logger) : IAstCompiler
             case Goto:
                 _assembler.jmp(_labels[node.Children[0].Lexeme.Text].LabelByRef);
                 break;
-            case NativeType:
+            case Type:
             case Scope:
                 break;
             case Import:

@@ -14,14 +14,12 @@ public class Lexer(string source, ILogger logger)
         var pos = 0;
         while (pos < source.Length)
         {
-            var matches = _lexemeDeclarations
-                .Select(x => (decl: x, match: Regex.Match(source[pos..], x.Pattern)))
-                .Where(x => x.match is { Success: true, Index: 0 })
-                .ToList();
+            var match = _lexemeDeclarations
+                .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
+                .SelectMany(x => x.matches.Select(y => (decl: x.decl, match: y)))
+                .FirstOrDefault(x => x.match.Success && x.match.Index == pos);
 
-            if (matches.Count == 0) throw new InvalidDataException();
-
-            var match = matches.First();
+            if (match == default) throw new InvalidDataException();
 
             pos += match.match.Value.Length;
             lexemes.Add(new Lexeme(match.decl.LexemeType, match.match.Value));

@@ -1,12 +1,10 @@
 import "..\..\..\..\Libraries\net8.0\StandardLibrary.dll"
 
-SetColor(GetRedColor())
-for (int64 i = 5) (i >= -5) (i = i - 1) ( WriteI64NoLn(i) )
-WriteLn()
+fact(int64 n) -> int64 (
+	if (n <= 2) ( ret 2 )
+	ret n * fact(n - 1)
+)
 
-SetColor(GetCyanColor())
-for (int64 i = -5) (i <= 5) (i = i + 1) ( WriteI64NoLn(i) )
-WriteLn()
-
-SetColor(GetWhiteColor())
-ret 0
+main() -> int64 (
+	ret fact(10)
+)

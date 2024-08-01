@@ -8,7 +8,7 @@ public enum LexemeType
     Identifier,
     Alias,
     Is,
-    NativeType,
+    Type,
     PointerType,
     Set,
     FunctionCall,
@@ -42,6 +42,8 @@ public enum LexemeType
     NotEqual,
     Negation,
     For,
+    FunctionDeclaration,
+    Arrow,
 
 
     Scope

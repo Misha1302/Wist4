@@ -11,6 +11,7 @@ public static class LexerData
     {
         var lds = new List<Ld>
         {
+            new(Comment, @"//[^\n]*"),
             new(Arrow, "->"),
             new(LeftPar, "\\("),
             new(RightPar, "\\)"),
@@ -46,7 +47,7 @@ public static class LexerData
             new(GreaterThan, "\\>"),
             new(Comma, ","),
             new(Minus, @"\-"),
-            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*")
+            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
         };
 
         var identifier = lds.Get(Identifier).Pattern;

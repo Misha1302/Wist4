@@ -8,21 +8,6 @@ namespace Wist.Backend.Compiler;
 
 using static LexemeType;
 
-/*
-small note about microsoft x64 calling conv
-https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170
-
-rcx, rdx, r8, r9 - args
-xmm0, xmm1, xmm2, xmm3 - args also
-
-rax, r10, r11, xmm4, xmm5 - volatile
-
-
-in this compiler:
-data transferring via stack
-
-r13, r14, r15 - temporally calculations
-*/
 public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 {
     private readonly AstCompilerData _data = new(
@@ -40,7 +25,7 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 
     private IExecutable GetExecutable()
     {
-        return Environment.OSVersion.Platform == PlatformID.Unix
+        return OS.IsLinux()
             ? new LinuxAsmExecutable(_data.Assembler, logger)
             : new WindowsAsmExecutable(_data.Assembler, logger);
     }

@@ -25,7 +25,7 @@ public class Lexer(string source, ILogger logger)
             lexemes.Add(new Lexeme(match.decl.LexemeType, match.match.Value));
         }
 
-        lexemes.RemoveAll(x => x.LexemeType is LexemeType.Spaces or LexemeType.NewLine);
+        lexemes.RemoveAll(x => x.LexemeType is LexemeType.Spaces or LexemeType.NewLine or LexemeType.Comment);
         logger.Log(string.Join("\n", lexemes));
         return lexemes;
     }

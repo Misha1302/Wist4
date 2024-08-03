@@ -44,7 +44,8 @@ public enum LexemeType
     For,
     FunctionDeclaration,
     Arrow,
+    Comment,
 
 
-    Scope
+    Scope,
 }

@@ -20,8 +20,9 @@ public class AstCompilerToAsmHelper
             {
                 if (node.Lexeme.LexemeType == LexemeType.Identifier
                     && node.Parent?.Lexeme.LexemeType == LexemeType.Set
+                    && node.Children.Count > 0
                    )
-                    localsSet.Add(node.Children[0].Lexeme.Text);
+                    localsSet.Add(node.Lexeme.Text);
 
                 if (node.Lexeme.LexemeType == LexemeType.Identifier
                     && node.Children.Count > 0

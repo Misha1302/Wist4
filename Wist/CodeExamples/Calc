@@ -13,6 +13,7 @@ bar() -> void (
 )
 
 main() -> int64 (
-    foo()
+    // need to drop foo value. Otherwise we'll catch stack overflow
+    for (int64 i = 0) (i < 100000000) (i = i + 1) ( foo() )
 	ret 123
 )

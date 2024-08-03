@@ -5,29 +5,14 @@ using Wist.Logger;
 
 namespace Wist.Backend.Executing;
 
-public class LinuxAsmExecutable(Assembler asm, ILogger logger) : IExecutable
+public class LinuxAsmExecutable(Assembler asm, ILogger logger) : AsmExecutableBase(asm, logger)
 {
-    public unsafe long Execute()
-    {
-        logger.Log(AsmPrinter.PrintCodeToString(asm));
-        var functionPointer = MakeFunction<long>();
-        logger.Log($"function created on address 0x{(long)functionPointer:x8}");
-        return functionPointer();
-    }
-
-    public byte[] ToBinary()
-    {
-        var stream = new MemoryStream();
-        asm.Assemble(new StreamCodeWriter(stream), 0);
-        return stream.ToArray();
-    }
-
-    private unsafe delegate*<T> MakeFunction<T>()
+    public override unsafe delegate*<T> MakeFunction<T>()
     {
         var bin = ToBinary();
-        var f = MemoryMappedFile.CreateNew(null, bin.Length, MemoryMappedFileAccess.ReadWriteExecute,
+        var memoryMappedFile = MemoryMappedFile.CreateNew(null, bin.Length, MemoryMappedFileAccess.ReadWriteExecute,
             MemoryMappedFileOptions.None, HandleInheritability.None);
-        var stream = f.CreateViewStream(0, 0, MemoryMappedFileAccess.ReadWriteExecute);
+        var stream = memoryMappedFile.CreateViewStream(0, 0, MemoryMappedFileAccess.ReadWriteExecute);
         var ptr = stream.SafeMemoryMappedViewHandle.DangerousGetHandle();
         Marshal.Copy(bin, 0, ptr, bin.Length);
 

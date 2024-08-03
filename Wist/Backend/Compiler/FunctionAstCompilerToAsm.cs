@@ -38,7 +38,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     private void EmitMainLoop(AstNode node)
     {
-        Label notIf;
         switch (node.Lexeme.LexemeType)
         {
             case LexemeType.Int64:
@@ -170,22 +169,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 LogicOp(data.Assembler.cmovne);
                 break;
             case LexemeType.For:
-                /*
-                int64 i = 0
-
-                while_start:
-
-                if (!(i < 10)) ( goto while_end )
-
-                body
-
-                i = i + 1
-
-                goto while_start
-
-                while_end:
-                */
-
                 var whileEnd = data.Assembler.CreateLabel("while_end");
 
                 // int64 i = 0
@@ -196,7 +179,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.Assembler.Label(ref whileStart);
 
                 // if (i < 10 == false) ( goto while_end )
-                notIf = data.Assembler.CreateLabel("while_start");
+                var notIf = data.Assembler.CreateLabel("while_start");
 
                 // condition
                 data.AstVisitor.Visit(node.Children[1], EmitMainLoop, data.Helper.NeedToVisitChildren);
@@ -252,6 +235,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Arrow:
             case LexemeType.Type:
             case LexemeType.Scope:
+            case LexemeType.Comment:
                 break;
             case LexemeType.Import:
                 data.DllsManager.Import(node.Children[0].Lexeme.Text[1..^1]);
@@ -281,8 +265,10 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     private void LoadArgumentsToRegisters(InfoAboutMethod funcToCall)
     {
-        if (Environment.OSVersion.Platform == PlatformID.Unix)
+        if (OS.IsLinux())
         {
+            // System V AMD64 ABI
+            // https://en.wikipedia.org/wiki/X86_calling_conventions
             if (funcToCall.parameters.Length >= 1) pop(rdi);
             if (funcToCall.parameters.Length >= 2) pop(rsi);
             if (funcToCall.parameters.Length >= 3) pop(rdx);
@@ -293,6 +279,8 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         }
         else
         {
+            // Microsoft x64 calling convention
+            // https://en.wikipedia.org/wiki/X86_calling_conventions
             if (funcToCall.parameters.Length >= 1) pop(rcx);
             if (funcToCall.parameters.Length >= 2) pop(rdx);
             if (funcToCall.parameters.Length >= 3) pop(r8);

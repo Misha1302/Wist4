@@ -13,7 +13,19 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     public void Compile(AstNode root)
     {
+        EmitLocalLabels(root);
         EmitMainLoop(root);
+    }
+
+    private void EmitLocalLabels(AstNode root)
+    {
+        data.AstVisitor.Visit(root, node =>
+        {
+            if (node.Lexeme.LexemeType != LexemeType.Label) return;
+
+            var lexemeText = node.Lexeme.Text[..^1];
+            data.Labels.Add(lexemeText, new LabelRef(data.Assembler.CreateLabel(lexemeText)));
+        }, _ => true);
     }
 
     private void EmitStack(AstNode root)
@@ -41,7 +53,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         switch (node.Lexeme.LexemeType)
         {
             case LexemeType.Int64:
-                data.Assembler.mov(r14, long.Parse(node.Lexeme.Text));
+                data.Assembler.mov(r14, long.Parse(node.Lexeme.Text.Replace("_", "")));
                 push(r14);
                 break;
             case LexemeType.Plus:
@@ -135,10 +147,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                     var needToPushPopStub = _sp % 16 != 0;
                     if (needToPushPopStub) pushStub();
 
-                    data.Assembler.sub(rsp, 32);
-                    Debug.Assert(_sp % 16 == 0);
-                    data.Assembler.call((ulong)funcToCall.ptr);
-                    data.Assembler.add(rsp, 32);
+                    DirectCall((ulong)funcToCall.ptr);
 
                     if (needToPushPopStub) popStub();
 
@@ -226,7 +235,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 break;
             case LexemeType.Label:
                 var labelName = node.Lexeme.Text[..^1]; // skip ':'
-                data.Labels.Add(labelName, new LabelRef(data.Assembler.CreateLabel(labelName)));
                 data.Assembler.Label(ref data.Labels[labelName].LabelByRef);
                 break;
             case LexemeType.Goto:
@@ -238,8 +246,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Comment:
                 break;
             case LexemeType.Import:
-                data.DllsManager.Import(node.Children[0].Lexeme.Text[1..^1]);
-                break;
             case LexemeType.String:
             case LexemeType.As:
             case LexemeType.Alias:
@@ -261,6 +267,14 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
         }
+    }
+
+    private void DirectCall(ulong ptr)
+    {
+        if (OS.IsWindows()) data.Assembler.sub(rsp, 32);
+        Debug.Assert(_sp % 16 == 0);
+        data.Assembler.call(ptr);
+        if (OS.IsWindows()) data.Assembler.add(rsp, 32);
     }
 
     private void LoadArgumentsToRegisters(InfoAboutMethod funcToCall)

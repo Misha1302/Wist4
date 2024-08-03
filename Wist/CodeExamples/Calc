@@ -1,19 +1,22 @@
 import "../../../../Libraries/net8.0/StandardLibrary.dll"
 
-
-foo() -> void (
-    WriteI64(222)
-    bar()
-    ret 0
-)
-
-bar() -> void (
-    WriteI64(333)
-    ret 0
+foo() -> int64 (
+    ret 5
 )
 
 main() -> int64 (
-    // need to drop foo value. Otherwise we'll catch stack overflow
-    for (int64 i = 0) (i < 100000000) (i = i + 1) ( foo() )
-	ret 123
+    // For some reason unknown to me, calls to Sharpe functions break something after ~140_000 calls. 
+    // This does not happen with the normal functions of this language.
+    
+    int64 y = 0
+    for (int64 i = 0) (i < 10_000_000) (i = i + 1) (
+        y = y + foo()
+    )
+    WriteI64(y)
+    
+    for (int64 i = 0) (i < 10_000_000) (i = i + 1) (
+        WriteI64NoLn(5)
+    )
+    
+	ret 777
 )

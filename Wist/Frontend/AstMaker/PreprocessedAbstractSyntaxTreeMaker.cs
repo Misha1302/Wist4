@@ -1,6 +1,6 @@
-﻿namespace Wist.Frontend.AstMaker;
+﻿using Wist.Frontend.Lexer.Lexemes;
 
-using Wist.Frontend.Lexer.Lexemes;
+namespace Wist.Frontend.AstMaker;
 
 public static class PreprocessedAbstractSyntaxTreeMaker
 {

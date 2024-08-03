@@ -1,14 +1,12 @@
-namespace Wist.Backend.Executing;
-
+using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using Iced.Intel;
 using Wist.Logger;
 
-public partial class AsmExecutable(Assembler asm, ILogger logger) : IExecutable
-{
-    private const uint PageExecuteReadwrite = 0x40;
-    private const uint MemCommit = 0x1000;
+namespace Wist.Backend.Executing;
 
+public class LinuxAsmExecutable(Assembler asm, ILogger logger) : IExecutable
+{
     public unsafe long Execute()
     {
         logger.Log(AsmPrinter.PrintCodeToString(asm));
@@ -24,13 +22,13 @@ public partial class AsmExecutable(Assembler asm, ILogger logger) : IExecutable
         return stream.ToArray();
     }
 
-    [LibraryImport("kernel32.dll", SetLastError = true)]
-    private static partial IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
-
     private unsafe delegate*<T> MakeFunction<T>()
     {
         var bin = ToBinary();
-        var ptr = VirtualAlloc(IntPtr.Zero, (uint)bin.Length, MemCommit, PageExecuteReadwrite);
+        var f = MemoryMappedFile.CreateNew(null, bin.Length, MemoryMappedFileAccess.ReadWriteExecute,
+            MemoryMappedFileOptions.None, HandleInheritability.None);
+        var stream = f.CreateViewStream(0, 0, MemoryMappedFileAccess.ReadWriteExecute);
+        var ptr = stream.SafeMemoryMappedViewHandle.DangerousGetHandle();
         Marshal.Copy(bin, 0, ptr, bin.Length);
 
         return (delegate*<T>)ptr;

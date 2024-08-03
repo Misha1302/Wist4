@@ -2,5 +2,8 @@
 
 public record Lexeme(LexemeType LexemeType, string Text)
 {
-    public override string ToString() => $"{Text}:{LexemeType}";
+    public override string ToString()
+    {
+        return $"{Text}:{LexemeType}";
+    }
 }

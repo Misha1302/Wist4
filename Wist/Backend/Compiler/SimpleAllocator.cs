@@ -1,6 +1,6 @@
-namespace Wist.Backend.Compiler;
-
 using System.Runtime.CompilerServices;
+
+namespace Wist.Backend.Compiler;
 
 public static class SimpleAllocator
 {
@@ -13,7 +13,9 @@ public static class SimpleAllocator
         _arrays.Add(arr);
 
         fixed (byte* ptr = arr)
+        {
             return (long)ptr;
+        }
     }
 
     public static unsafe void Free(long ptr)

@@ -9,6 +9,13 @@ public static class BuildinFunctions
     public static readonly unsafe ulong WriteLnPtr = (ulong)(delegate*<void>)&Console.WriteLine;
     public static readonly unsafe ulong ReadI64Ptr = (ulong)(delegate*<long>)&ReadI64;
 
-    private static long ReadI64() => long.Parse(Console.ReadLine()!);
-    private static void WriteI64NoLn(long value) => Console.Write($"{value} ");
+    private static long ReadI64()
+    {
+        return long.Parse(Console.ReadLine()!);
+    }
+
+    private static void WriteI64NoLn(long value)
+    {
+        Console.Write($"{value} ");
+    }
 }

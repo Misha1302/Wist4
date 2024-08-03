@@ -1,6 +1,6 @@
-﻿namespace Wist.Frontend.AstMaker;
+﻿using System.Diagnostics;
 
-using System.Diagnostics;
+namespace Wist.Frontend.AstMaker;
 
 public static class ListExtensions
 {

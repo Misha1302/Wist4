@@ -1,7 +1,9 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
 namespace Wist.Backend.Compiler;
 
-using System.Reflection;
-using InfoAboutMethod = (nint ptr, System.Reflection.ParameterInfo[] parameters, Type returnType);
+using InfoAboutMethod = (nint ptr, ParameterInfo[] parameters, Type returnType);
 
 public class DllsManager
 {
@@ -10,11 +12,24 @@ public class DllsManager
     public void Import(string path)
     {
         var functions = Assembly.LoadFrom(path).GetTypes()
-            .SelectMany(x => x.GetMethods(BindingFlags.Public | BindingFlags.Static));
+            .SelectMany(x => x.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            .ToList();
 
         foreach (var function in functions)
-            _functions.Add(function.Name, (function.MethodHandle.GetFunctionPointer(), function.GetParameters(), function.ReturnType));
+            RuntimeHelpers.PrepareMethod(function.MethodHandle);
+
+        foreach (var function in functions)
+            _functions.Add(function.Name,
+                (function.MethodHandle.GetFunctionPointer(), function.GetParameters(), function.ReturnType));
     }
 
-    public InfoAboutMethod GetPointerOf(string functionName) => _functions[functionName];
+    public InfoAboutMethod GetPointerOf(string functionName)
+    {
+        return _functions[functionName];
+    }
+
+    public bool HasFunction(string funcName)
+    {
+        return _functions.ContainsKey(funcName);
+    }
 }

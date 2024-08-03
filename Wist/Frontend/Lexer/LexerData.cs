@@ -1,7 +1,9 @@
-﻿namespace Wist.Frontend.Lexer;
+﻿using Wist.Frontend.Lexer.Lexemes;
 
-using static Lexemes.LexemeType;
-using Ld = Lexemes.LexemeDeclaration;
+namespace Wist.Frontend.Lexer;
+
+using static LexemeType;
+using Ld = LexemeDeclaration;
 
 public static class LexerData
 {
@@ -53,10 +55,10 @@ public static class LexerData
         lds.Insert(0, new Ld(Label, $"{identifier}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
         lds.Insert(0, new Ld(FunctionDeclaration, $@"{identifier}\s*(?=(\(\s*[a-zA-Z0-9\s]*\)\s*\-\>))"));
-        
+
         var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
-        string first = @$"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=(\s+{identifier}))";
-        string second = @$"(?<=(\>\s*))(?!({keywords})){identifier}";
+        var first = @$"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=(\s+{identifier}))";
+        var second = @$"(?<=(\>\s*))(?!({keywords})){identifier}";
         lds.Insert(0, new Ld(Type, $"({first})|({second})"));
 
         return lds;

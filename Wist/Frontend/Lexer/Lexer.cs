@@ -1,8 +1,8 @@
-﻿namespace Wist.Frontend.Lexer;
-
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.Logger;
+
+namespace Wist.Frontend.Lexer;
 
 public class Lexer(string source, ILogger logger)
 {
@@ -16,7 +16,7 @@ public class Lexer(string source, ILogger logger)
         {
             var match = _lexemeDeclarations
                 .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
-                .SelectMany(x => x.matches.Select(y => (decl: x.decl, match: y)))
+                .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
                 .FirstOrDefault(x => x.match.Success && x.match.Index == pos);
 
             if (match == default) throw new InvalidDataException();

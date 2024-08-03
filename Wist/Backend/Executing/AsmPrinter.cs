@@ -1,6 +1,6 @@
-namespace Wist.Backend.Executing;
-
 using Iced.Intel;
+
+namespace Wist.Backend.Executing;
 
 public static class AsmPrinter
 {

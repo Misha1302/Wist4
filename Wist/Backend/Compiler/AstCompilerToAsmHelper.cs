@@ -1,5 +1,6 @@
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
+using static Wist.Frontend.Lexer.Lexemes.LexemeType;
 
 namespace Wist.Backend.Compiler;
 
@@ -9,8 +10,8 @@ public class AstCompilerToAsmHelper
 
     public bool NeedToVisitChildren(AstNode node)
     {
-        return node.Lexeme.LexemeType is not LexemeType.If and not LexemeType.Elif and not LexemeType.Else
-            and not LexemeType.Goto and not LexemeType.For and not LexemeType.Import and not LexemeType.FunctionCall;
+        return node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto and not For and not Import
+            and not FunctionCall and not GettingRef;
     }
 
     public (Dictionary<string, int> locals, int allocationBytes) GetInfoAboutLocals(AstNode root)
@@ -18,16 +19,16 @@ public class AstCompilerToAsmHelper
         var localsSet = new HashSet<string>();
         _astVisitor.Visit(root, node =>
             {
-                if (node.Lexeme.LexemeType == LexemeType.Identifier
-                    && node.Parent?.Lexeme.LexemeType == LexemeType.Set
+                if (node.Lexeme.LexemeType == Identifier
+                    && node.Parent?.Lexeme.LexemeType == Set
                     && node.Children.Count > 0
                    )
                     localsSet.Add(node.Lexeme.Text);
 
-                if (node.Lexeme.LexemeType == LexemeType.Identifier
+                if (node.Lexeme.LexemeType == Identifier
                     && node.Children.Count > 0
                     && node.Children[0].Lexeme.LexemeType == LexemeType.Type
-                    && node.Parent?.Parent?.Lexeme.LexemeType == LexemeType.FunctionDeclaration
+                    && node.Parent?.Parent?.Lexeme.LexemeType == FunctionDeclaration
                    )
                     localsSet.Add(node.Lexeme.Text);
             },

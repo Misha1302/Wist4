@@ -57,6 +57,7 @@ public static class LexerData
         var second = @$"(?<=(\>\s*))(?!({keywords})){identifier}";
         lds.Insert(0, new Ld(Type, $"({first})|({second})"));
 
+        lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
         lds.Insert(0, new Ld(PointerType, $"{identifier}\\*"));
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Label, $"{identifier}:"));

@@ -12,9 +12,9 @@ public partial class WindowsAsmExecutable(Assembler asm, ILogger logger) : AsmEx
     [LibraryImport("kernel32.dll", SetLastError = true)]
     private static partial IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
 
-    public override unsafe delegate*<T> MakeFunction<T>()
+    public override unsafe delegate*<T> MakeFunction<T>(out byte[] bin)
     {
-        var bin = ToBinary();
+        bin = ToBinary();
         var ptr = VirtualAlloc(IntPtr.Zero, (uint)bin.Length, MemCommit, PageExecuteReadwrite);
         Marshal.Copy(bin, 0, ptr, bin.Length);
 

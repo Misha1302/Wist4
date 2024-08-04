@@ -7,9 +7,9 @@ namespace Wist.Backend.Executing;
 
 public class LinuxAsmExecutable(Assembler asm, ILogger logger) : AsmExecutableBase(asm, logger)
 {
-    public override unsafe delegate*<T> MakeFunction<T>()
+    public override unsafe delegate*<T> MakeFunction<T>(out byte[] bin)
     {
-        var bin = ToBinary();
+        bin = ToBinary();
         var memoryMappedFile = MemoryMappedFile.CreateNew(null, bin.Length, MemoryMappedFileAccess.ReadWriteExecute,
             MemoryMappedFileOptions.None, HandleInheritability.None);
         var stream = memoryMappedFile.CreateViewStream(0, 0, MemoryMappedFileAccess.ReadWriteExecute);

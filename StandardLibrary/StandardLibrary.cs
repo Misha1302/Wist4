@@ -1,4 +1,6 @@
-﻿namespace StandardLibrary;
+﻿using System.Runtime.CompilerServices;
+
+namespace StandardLibrary;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedType.Global
@@ -7,6 +9,11 @@ public static class StandardLibrary
     public static void WriteI64(long value)
     {
         Console.WriteLine(value);
+    }
+
+    public static unsafe long ReadMemI64(long address)
+    {
+        return Unsafe.Read<long>((void*)address);
     }
 
     public static void WriteI64NoLn(long value)

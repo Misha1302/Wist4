@@ -163,6 +163,18 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 }
 
                 break;
+            case LexemeType.GettingRef:
+                var referenceIdentifier = node.Children[0].Lexeme.Text;
+                if (_locals.TryGetValue(referenceIdentifier, out var localOffset))
+                    data.Assembler.lea(r14, __[rbp - localOffset]);
+                else if (data.Labels.TryGetValue(referenceIdentifier, out var labelRef))
+                    data.Assembler.lea(r14, __[labelRef.LabelByRef]);
+                else if (data.DllsManager.HasFunction(referenceIdentifier))
+                    data.Assembler.mov(r14, data.DllsManager.GetPointerOf(referenceIdentifier).ptr);
+                else throw new InvalidOperationException();
+
+                push(r14);
+                break;
             case LexemeType.Equal:
                 LogicOp(data.Assembler.cmove);
                 break;

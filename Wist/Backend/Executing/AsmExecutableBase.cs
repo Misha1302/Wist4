@@ -8,8 +8,11 @@ public abstract class AsmExecutableBase(Assembler asm, ILogger logger) : IExecut
     public unsafe long Execute()
     {
         logger.Log(AsmPrinter.PrintCodeToString(asm));
-        var functionPointer = MakeFunction<long>();
-        logger.Log($"function created on address 0x{(long)functionPointer:x8}");
+        var functionPointer = MakeFunction<long>(out var bin);
+
+        logger.Log(
+            $"Successfully compiled assembly code. Address: 0x{(ulong)functionPointer:x8}. Size in bytes: {bin.Length}");
+
         return functionPointer();
     }
 
@@ -20,5 +23,5 @@ public abstract class AsmExecutableBase(Assembler asm, ILogger logger) : IExecut
         return stream.ToArray();
     }
 
-    public abstract unsafe delegate*<T> MakeFunction<T>();
+    public abstract unsafe delegate*<T> MakeFunction<T>(out byte[] bin);
 }

@@ -45,6 +45,7 @@ public enum LexemeType
     FunctionDeclaration,
     Arrow,
     Comment,
+    GettingRef,
 
 
     Scope,

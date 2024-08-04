@@ -16,7 +16,7 @@ public static class Program
 
     private static void Execute()
     {
-        var logger = new ConsoleLogger();
+        var logger = new FileLogger();
         var sourceCodeReader = new SourceCodeReader(logger);
         var source = sourceCodeReader.Read("CodeExamples/Calc");
 

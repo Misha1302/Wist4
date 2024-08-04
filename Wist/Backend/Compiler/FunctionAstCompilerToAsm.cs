@@ -255,6 +255,13 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Goto:
                 data.Assembler.jmp(data.Labels[node.Children[0].Lexeme.Text].LabelByRef);
                 break;
+            case LexemeType.Modulo:
+                data.Assembler.mov(rdx, 0);
+                pop(r14);
+                pop(rax);
+                data.Assembler.idiv(r14);
+                push(rdx);
+                break;
             case LexemeType.Arrow:
             case LexemeType.Type:
             case LexemeType.Scope:

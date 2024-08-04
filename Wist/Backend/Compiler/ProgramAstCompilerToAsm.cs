@@ -46,11 +46,15 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
         _data.Assembler.push(r13);
         _data.Assembler.push(r14);
         _data.Assembler.push(r15);
+        _data.Assembler.push(rdx);
+        _data.Assembler.push(r15);
         _data.Assembler.mov(rbp, rsp);
 
         _data.Assembler.call(_data.Labels["main"].LabelByRef);
 
         _data.Assembler.mov(rsp, rbp);
+        _data.Assembler.pop(r15);
+        _data.Assembler.pop(rdx);
         _data.Assembler.pop(r15);
         _data.Assembler.pop(r14);
         _data.Assembler.pop(r13);

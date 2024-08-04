@@ -46,6 +46,7 @@ public enum LexemeType
     Arrow,
     Comment,
     GettingRef,
+    Modulo,
 
 
     Scope,

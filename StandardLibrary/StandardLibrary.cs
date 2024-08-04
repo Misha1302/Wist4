@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace StandardLibrary;
 
@@ -7,6 +8,61 @@ namespace StandardLibrary;
 // ReSharper disable UnusedType.Global
 public static class StandardLibrary
 {
+    public static unsafe long Float64Add(long a, long b)
+    {
+        var c = *(double*)&a + *(double*)&b;
+        return *(long*)&c;
+    }
+
+    public static unsafe long Float64Sub(long a, long b)
+    {
+        var c = *(double*)&a - *(double*)&b;
+        return *(long*)&c;
+    }
+
+    public static unsafe long Float64Mul(long a, long b)
+    {
+        var c = *(double*)&a * *(double*)&b;
+        return *(long*)&c;
+    }
+
+    public static unsafe long Float64Div(long a, long b)
+    {
+        var c = *(double*)&a / *(double*)&b;
+        return *(long*)&c;
+    }
+
+    public static unsafe long ToFloat64(long charsArrayPtr)
+    {
+        var d = double.Parse(ArrToStr(charsArrayPtr));
+        return *(long*)&d;
+    }
+
+    public static long I64ToStr(long value)
+    {
+        var s = value.ToString();
+        var ptr = Calloc(s.Length * sizeof(char) + 8) + 8;
+        WriteMemI64(ptr - 8, s.Length);
+        for (var i = 0; i < s.Length; i++)
+            WriteMemI64(ptr + i * sizeof(char), s[i]);
+        return ptr;
+    }
+
+    private static unsafe string ArrToStr(long ptr)
+    {
+        var len = ReadMemI64(ptr - 8);
+        var sb = new StringBuilder(16);
+        for (var i = 0; i < len; i++)
+            sb.Append(Unsafe.Read<char>((void*)(ptr + i * sizeof(char))));
+        return sb.ToString();
+    }
+
+
+    public static unsafe void WriteF64(long value)
+    {
+        Console.WriteLine(*(double*)&value);
+    }
+
     public static void WriteI64(long value)
     {
         Console.WriteLine(value);

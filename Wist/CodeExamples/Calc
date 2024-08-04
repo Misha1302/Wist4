@@ -1,42 +1,24 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    i64 arr = makeArray()
-    i64 foundIndex = binSearch(arr, 87)
-    WriteI64NoLn(foundIndex)
+    // 1 - 1/3 + 1/5 - 1/7 + 1/9... = pi
+    
+    f64 one = ToFloat64(I64ToStr(1))
+    
+    f64 pi = (one) 
+    
+    i64 d = 3
+    for (i64 i = 0) (1) (i = i + 1) (
+        f64 next = Float64Div(one, ToFloat64(I64ToStr(d)))
+        
+        if (i % 2 == 1) ( pi = Float64Add(pi, next) )
+        if (i % 2 == 0) ( pi = Float64Sub(pi, next) )
+        d = d + 2
 
-    WriteI64(ReadMemI64(arr + foundIndex * 8))
+        WriteI64NoLn(i)
+        WriteF64(Float64Mul(pi, ToFloat64(I64ToStr(4))))
+    )
+    
 
     ret 0
-)
-
-makeArray() -> i64 (
-    i64 arrLen = 6
-    i64 arr = Calloc(arrLen * 8 + 8) + 8
-    WriteMemI64(arr + -1 * 8, arrLen)
-    WriteMemI64(arr + 0 * 8, -9)
-    WriteMemI64(arr + 1 * 8, -6)
-    WriteMemI64(arr + 2 * 8, 2)
-    WriteMemI64(arr + 3 * 8, 5)
-    WriteMemI64(arr + 4 * 8, 87)
-    WriteMemI64(arr + 5 * 8, 123)
-
-    ret arr
-)
-
-binSearch(i64 arr, i64 elementToFind) -> i64 (
-    i64 left = 0
-    i64 right = ReadMemI64(arr + (-1) * 8)
-
-    for () (left <= right) () (
-        i64 middle = (left + right) / 2
-        i64 m = ReadMemI64(arr + middle * 8)
-
-        if (m < elementToFind) ( left = middle + 1 )
-        if (m > elementToFind) ( right = middle - 1 )
-        if (m == elementToFind) ( ret middle )
-
-    )
-
-    ret 0 - left
 )

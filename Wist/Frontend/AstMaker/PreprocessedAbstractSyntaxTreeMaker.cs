@@ -9,6 +9,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef],
         [LexemeType.Type, PointerType],
+        [Modulo],
         [Mul, Div],
         [Plus, Minus],
         [Equal, NotEqual],
@@ -50,6 +51,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                         curNode.AddAndRemove(astNodes, i + 1, i + 2, i + 3, i + 4);
                         curNode.Children[0].Children.RemoveAll(x => x.Lexeme.LexemeType == Comma);
                         break;
+                    case Modulo:
                     case Minus:
                     case Div:
                     case Mul:

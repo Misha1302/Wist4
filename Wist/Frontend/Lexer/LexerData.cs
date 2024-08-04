@@ -61,7 +61,7 @@ public static class LexerData
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Label, $"{identifier}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
-        lds.Insert(0, new Ld(FunctionDeclaration, $@"{identifier}\s*(?=(\(\s*[a-zA-Z0-9\s]*\)\s*\-\>))"));
+        lds.Insert(0, new Ld(FunctionDeclaration, $@"{identifier}\s*(?=(\(\s*[a-zA-Z0-9\s,]*\)\s*\-\>))"));
 
         return lds;
     }

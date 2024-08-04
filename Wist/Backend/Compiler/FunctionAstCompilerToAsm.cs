@@ -111,6 +111,8 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                 EmitEnter();
                 EmitStack(node);
+                EmitParameters(node);
+
                 data.AstVisitor.Visit(node, EmitMainLoop, data.Helper.NeedToVisitChildren);
 
                 break;
@@ -128,11 +130,13 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                     var endSp = _sp;
                     var deltaSp = endSp - startSp;
 
+                    Console.WriteLine(funcName);
                     Debug.Assert(_sp % 16 == 0);
 
                     data.Assembler.call(funcLabel.LabelByRef);
 
                     data.Assembler.add(rsp, deltaSp);
+                    _sp -= deltaSp;
 
                     push(rax);
                 }
@@ -244,6 +248,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Type:
             case LexemeType.Scope:
             case LexemeType.Comment:
+            case LexemeType.Comma:
                 break;
             case LexemeType.Import:
             case LexemeType.String:
@@ -263,9 +268,21 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Else:
             case LexemeType.Spaces:
             case LexemeType.NewLine:
-            case LexemeType.Comma:
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
+        }
+    }
+
+    private void EmitParameters(AstNode node)
+    {
+        var offset = 0;
+        var parameters = node.Children[0].Children;
+
+        foreach (var parameter in parameters)
+        {
+            data.Assembler.mov(r14, __[rbp + 16 + offset]);
+            data.Assembler.mov(__[rbp - _locals[parameter.Lexeme.Text]], r14);
+            offset += 8;
         }
     }
 

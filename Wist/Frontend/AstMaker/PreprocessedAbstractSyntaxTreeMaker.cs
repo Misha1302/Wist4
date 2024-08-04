@@ -7,7 +7,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
 {
     private static readonly LexemeType[][] LexemeTypes =
     [
-        [Goto, For, Import, FunctionDeclaration],
+        [Goto, For, Import, FunctionDeclaration, FunctionCall],
         [LexemeType.Type, PointerType],
         [Mul, Div],
         [Plus, Minus],
@@ -44,6 +44,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                     case FunctionDeclaration:
                         if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i + 1, i + 2, i + 3, i + 4);
+                        curNode.Children[0].Children.RemoveAll(x => x.Lexeme.LexemeType == Comma);
                         break;
                     case Minus:
                     case Div:
@@ -99,6 +100,9 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                         if (curNode.Children.Count != 0) continue;
                         curNode.AddAndRemove(astNodes, i + 1);
                         break;
+                    case FunctionCall:
+                        curNode.Children[0].Children.RemoveAll(x => x.Lexeme.LexemeType == Comma);
+                        break;
                     case Label:
                         break;
                     case Spaces:
@@ -110,7 +114,6 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                     case Identifier:
                     case Alias:
                     case Is:
-                    case FunctionCall:
                     case LeftPar:
                     case RightPar:
                     case LeftBrace:

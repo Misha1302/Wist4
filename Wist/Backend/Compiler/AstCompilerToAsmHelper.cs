@@ -27,7 +27,7 @@ public class AstCompilerToAsmHelper
                 if (node.Lexeme.LexemeType == LexemeType.Identifier
                     && node.Children.Count > 0
                     && node.Children[0].Lexeme.LexemeType == LexemeType.Type
-                    && node.Parent?.Lexeme.LexemeType == LexemeType.FunctionDeclaration
+                    && node.Parent?.Parent?.Lexeme.LexemeType == LexemeType.FunctionDeclaration
                    )
                     localsSet.Add(node.Lexeme.Text);
             },

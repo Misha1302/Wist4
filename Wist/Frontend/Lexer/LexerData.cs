@@ -52,9 +52,10 @@ public static class LexerData
 
 
         var identifier = lds.Get(Identifier).Pattern;
+        var arrow = lds.Get(Arrow).Pattern;
         var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
         var first = @$"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=(\s+{identifier}))";
-        var second = @$"(?<=(\>\s*))(?!({keywords})){identifier}";
+        var second = @$"(?<=({arrow}\s*))(?!({keywords})){identifier}";
         lds.Insert(0, new Ld(Type, $"({first})|({second})"));
 
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));

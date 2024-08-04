@@ -34,8 +34,6 @@ public static class Program
 
         File.WriteAllBytes("program.bin", executable.ToBinary());
 
-        var result = executable.Execute();
-
-        Console.WriteLine(result);
+        executable.Execute();
     }
 }

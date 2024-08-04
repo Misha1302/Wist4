@@ -1,4 +1,3 @@
 namespace Wist.Logger;
 
-public class ConsoleLogger()
-    : StandardLoggerBase(Console.WriteLine);
+public class ConsoleLogger() : StandardLoggerBase(Console.WriteLine);

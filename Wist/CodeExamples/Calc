@@ -1,12 +1,42 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
-factorial(int64 x) -> int64 (    if (x <= 2) ( ret (x) )
-    ret x * factorial(x - 1))
-doubleMul(int64 a, int64 b) -> int64 (
-   ret a * b * 2 )
-main() -> int64 (
-    for (int64 i = 0) (i < 100_000_000) (i = i + 1) (        
-        WriteI64NoLn(i)
-        WriteI64NoLn(&i)
-        WriteI64(ReadMemI64(&i))
-    )    ret 0
+
+main() -> i64 (
+    i64 arr = makeArray()
+    i64 foundIndex = binSearch(arr, 87)
+    WriteI64NoLn(foundIndex)
+
+    WriteI64(ReadMemI64(arr + foundIndex * 8))
+
+    ret 0
+)
+
+makeArray() -> i64 (
+    i64 arrLen = 6
+    i64 arr = Calloc(arrLen * 8 + 8) + 8
+    WriteMemI64(arr + -1 * 8, arrLen)
+    WriteMemI64(arr + 0 * 8, -9)
+    WriteMemI64(arr + 1 * 8, -6)
+    WriteMemI64(arr + 2 * 8, 2)
+    WriteMemI64(arr + 3 * 8, 5)
+    WriteMemI64(arr + 4 * 8, 87)
+    WriteMemI64(arr + 5 * 8, 123)
+
+    ret arr
+)
+
+binSearch(i64 arr, i64 elementToFind) -> i64 (
+    i64 left = 0
+    i64 right = ReadMemI64(arr + (-1) * 8)
+
+    for () (left <= right) () (
+        i64 middle = (left + right) / 2
+        i64 m = ReadMemI64(arr + middle * 8)
+
+        if (m < elementToFind) ( left = middle + 1 )
+        if (m > elementToFind) ( right = middle - 1 )
+        if (m == elementToFind) ( ret middle )
+
+    )
+
+    ret 0 - left
 )

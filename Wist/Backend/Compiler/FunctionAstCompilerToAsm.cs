@@ -126,11 +126,10 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                     var presumablyEndSp = startSp + argsCount * 8;
                     if (presumablyEndSp % 16 != 0) pushStub();
 
-                    data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
+                    data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren, true);
                     var endSp = _sp;
                     var deltaSp = endSp - startSp;
 
-                    Console.WriteLine(funcName);
                     Debug.Assert(_sp % 16 == 0);
 
                     data.Assembler.call(funcLabel.LabelByRef);
@@ -144,7 +143,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 {
                     var funcToCall = data.DllsManager.GetPointerOf(funcName);
 
-                    data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
+                    data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren, true);
 
                     LoadArgumentsToRegisters(funcToCall);
 

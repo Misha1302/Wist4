@@ -10,10 +10,15 @@ public abstract class AsmExecutableBase(Assembler asm, ILogger logger) : IExecut
         logger.Log(AsmPrinter.PrintCodeToString(asm));
         var functionPointer = MakeFunction<long>(out var bin);
 
-        logger.Log(
-            $"Successfully compiled assembly code. Address: 0x{(ulong)functionPointer:x8}. Size in bytes: {bin.Length}");
+        logger.Log($"Successfully compiled assembly code. " +
+                   $"Address: 0x{(ulong)functionPointer:x8}. " +
+                   $"Size in bytes: {bin.Length}");
 
-        return functionPointer();
+        var exitCode = functionPointer();
+
+        logger.Log($"Program {(exitCode == 0 ? "successfully finished" : "failed")} with exit code {exitCode}");
+
+        return exitCode;
     }
 
     public byte[] ToBinary()

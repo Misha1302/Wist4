@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace StandardLibrary;
 
@@ -14,6 +15,16 @@ public static class StandardLibrary
     public static unsafe long ReadMemI64(long address)
     {
         return Unsafe.Read<long>((void*)address);
+    }
+
+    public static unsafe void WriteMemI64(long address, long value)
+    {
+        Unsafe.Write((void*)address, value);
+    }
+
+    public static long Calloc(long bytes)
+    {
+        return Marshal.UnsafeAddrOfPinnedArrayElement(GC.AllocateArray<byte>((int)bytes, true), 0);
     }
 
     public static void WriteI64NoLn(long value)

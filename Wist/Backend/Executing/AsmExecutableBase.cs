@@ -14,6 +14,9 @@ public abstract class AsmExecutableBase(Assembler asm, ILogger logger) : IExecut
                    $"Address: 0x{(ulong)functionPointer:x8}. " +
                    $"Size in bytes: {bin.Length}");
 
+        GC.Collect(0, GCCollectionMode.Forced, true);
+        GC.Collect(1, GCCollectionMode.Forced, true);
+        GC.Collect(2, GCCollectionMode.Forced, true);
         var exitCode = functionPointer();
 
         logger.Log($"Program {(exitCode == 0 ? "successfully finished" : "failed")} with exit code {exitCode}");

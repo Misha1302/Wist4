@@ -16,6 +16,11 @@ public class LinuxAsmExecutable(Assembler asm, ILogger logger) : AsmExecutableBa
         var ptr = stream.SafeMemoryMappedViewHandle.DangerousGetHandle();
         Marshal.Copy(bin, 0, ptr, bin.Length);
 
+#pragma warning disable CA1816
+        GC.SuppressFinalize(memoryMappedFile);
+        GC.SuppressFinalize(stream.SafeMemoryMappedViewHandle);
+#pragma warning restore CA1816
+
         return (delegate*<T>)ptr;
     }
 }

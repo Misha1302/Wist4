@@ -12,12 +12,15 @@ public class Lexer(string source, ILogger logger)
     {
         var lexemes = new List<Lexeme>();
         var pos = 0;
+        var regex = _lexemeDeclarations
+            .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
+            .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
+            .Where(x => x.match.Success)
+            .ToList();
+
         while (pos < source.Length)
         {
-            var match = _lexemeDeclarations
-                .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
-                .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
-                .FirstOrDefault(x => x.match.Success && x.match.Index == pos);
+            var match = regex.FirstOrDefault(x => x.match.Index == pos);
 
             if (match == default) throw new InvalidDataException();
 

@@ -1,6 +1,6 @@
-namespace Wist.MiddleEnd;
-
 using Wist.Frontend.AstMaker;
+
+namespace Wist.MiddleEnd;
 
 public interface IAstOptimizer
 {

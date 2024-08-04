@@ -1,6 +1,6 @@
-namespace Wist.Logger;
-
 using System.Diagnostics;
+
+namespace Wist.Logger;
 
 public abstract class StandardLoggerBase(Action<string> logMethod) : ILogger
 {

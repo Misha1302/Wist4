@@ -1,6 +1,6 @@
-namespace Wist.Frontend;
-
 using Wist.Logger;
+
+namespace Wist.Frontend;
 
 public class SourceCodeReader(ILogger logger)
 {

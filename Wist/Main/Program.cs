@@ -1,11 +1,11 @@
-﻿namespace Wist.Main;
-
-using Wist.Backend.Compiler;
+﻿using Wist.Backend.Compiler;
 using Wist.Frontend;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer;
 using Wist.Logger;
 using Wist.MiddleEnd;
+
+namespace Wist.Main;
 
 public static class Program
 {
@@ -16,7 +16,7 @@ public static class Program
 
     private static void Execute()
     {
-        var logger = new FileLogger();
+        var logger = new ConsoleLogger();
         var sourceCodeReader = new SourceCodeReader(logger);
         var source = sourceCodeReader.Read("CodeExamples/Calc");
 
@@ -29,7 +29,7 @@ public static class Program
         var astOptimizer = new AstOptimizerStub();
         var optimizedRoot = astOptimizer.OptimizeAst(astRoot);
 
-        var compiler = new AstCompilerToAsm(logger);
+        var compiler = new ProgramAstCompilerToAsm(logger);
         var executable = compiler.Compile(optimizedRoot);
 
         File.WriteAllBytes("program.bin", executable.ToBinary());

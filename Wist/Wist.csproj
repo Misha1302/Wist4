@@ -8,6 +8,14 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <OutputPath>bin/net8.0/</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <OutputPath>bin/net8.0/</OutputPath>
+    </PropertyGroup>
+
     <ItemGroup>
         <None Update="CodeExamples\BinarySearch">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>

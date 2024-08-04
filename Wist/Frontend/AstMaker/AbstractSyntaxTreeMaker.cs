@@ -1,7 +1,7 @@
-﻿namespace Wist.Frontend.AstMaker;
-
-using Wist.Frontend.Lexer.Lexemes;
+﻿using Wist.Frontend.Lexer.Lexemes;
 using Wist.Logger;
+
+namespace Wist.Frontend.AstMaker;
 
 public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
 {

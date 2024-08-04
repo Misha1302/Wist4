@@ -1,6 +1,6 @@
-namespace Wist.Backend.Executing;
-
 using Iced.Intel;
+
+namespace Wist.Backend.Executing;
 
 public static class AsmPrinter
 {
@@ -13,8 +13,9 @@ public static class AsmPrinter
             NumberBase = NumberBase.Decimal,
             MemorySizeOptions = MemorySizeOptions.Default,
             DecimalDigitGroupSize = 3,
-            DigitSeparator = "'"
+            DigitSeparator = "'",
         });
+
         foreach (var i in asm.Instructions)
         {
             formatter.Format(i, so);

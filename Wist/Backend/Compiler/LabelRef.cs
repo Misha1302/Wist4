@@ -1,6 +1,6 @@
-namespace Wist.Backend.Compiler;
-
 using Iced.Intel;
+
+namespace Wist.Backend.Compiler;
 
 public class LabelRef(Label label)
 {

@@ -1,12 +1,13 @@
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using Iced.Intel;
-using Wist.Backend.Compiler;
+using Wist.Backend.Compiler.DebugData;
 using Wist.Logger;
 
 namespace Wist.Backend.Executing;
 
-public class LinuxAsmExecutable(Assembler asm, IDebugData debugData, ILogger logger) : AsmExecutableBase(asm, debugData, logger)
+public class LinuxAsmExecutable(Assembler asm, IDebugData debugData, ILogger logger)
+    : AsmExecutableBase(asm, debugData, logger)
 {
     public override unsafe delegate*<T> MakeFunction<T>(out byte[] bin)
     {

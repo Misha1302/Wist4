@@ -1,5 +1,5 @@
 using Iced.Intel;
-using Wist.Backend.Compiler;
+using Wist.Backend.Compiler.DebugData;
 
 namespace Wist.Backend.Executing;
 

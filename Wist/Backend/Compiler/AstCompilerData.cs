@@ -9,5 +9,5 @@ public record AstCompilerData(
     DllsManager DllsManager,
     Dictionary<string, LabelRef> Labels,
     AstCompilerToAsmHelper Helper,
-    DebugData DebugData
+    DebugData.DebugData DebugData
 );

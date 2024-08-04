@@ -11,7 +11,8 @@ using static LexemeType;
 public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 {
     private readonly AstCompilerData _data = new(
-        new Assembler(64), new AstVisitor(), new DllsManager(), [], new AstCompilerToAsmHelper(), new DebugData()
+        new Assembler(64), new AstVisitor(), new DllsManager(), [], new AstCompilerToAsmHelper(),
+        new DebugData.DebugData()
     );
 
     public IExecutable Compile(AstNode root)
@@ -27,7 +28,9 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
     {
         return OS.IsLinux()
             ? new LinuxAsmExecutable(_data.Assembler, _data.DebugData, logger)
-            : new WindowsAsmExecutable(_data.Assembler, _data.DebugData, logger);
+            : OS.IsWindows()
+                ? new WindowsAsmExecutable(_data.Assembler, _data.DebugData, logger)
+                : throw new InvalidOperationException("No supported executable for this OS");
     }
 
     private void EmitFunctionCodes(AstNode root)

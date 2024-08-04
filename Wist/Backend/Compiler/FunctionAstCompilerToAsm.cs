@@ -50,8 +50,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     private void EmitMainLoop(AstNode node)
     {
-        var depthLevel = node.GetScopeDepth(); // node.Lexeme.LexemeType == LexemeType.FunctionDeclaration ? 12 : 6;
-        data.DebugData.Add(data.Assembler.Instructions.Count, depthLevel, node.Lexeme.ToString());
+        data.DebugData.Add(data.Assembler.Instructions.Count, node.GetScopeDepth(), node.Lexeme.ToString());
 
         switch (node.Lexeme.LexemeType)
         {

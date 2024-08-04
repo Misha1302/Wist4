@@ -1,4 +1,4 @@
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.DebugData;
 
 public interface IDebugData
 {

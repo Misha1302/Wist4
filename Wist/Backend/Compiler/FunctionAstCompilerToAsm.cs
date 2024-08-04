@@ -50,6 +50,9 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     private void EmitMainLoop(AstNode node)
     {
+        var depthLevel = node.GetScopeDepth(); // node.Lexeme.LexemeType == LexemeType.FunctionDeclaration ? 12 : 6;
+        data.DebugData.Add(data.Assembler.Instructions.Count, depthLevel, node.Lexeme.ToString());
+
         switch (node.Lexeme.LexemeType)
         {
             case LexemeType.Int64:
@@ -231,7 +234,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 EmitIfBlock(node, endIfLabel);
 
                 data.Assembler.Label(ref endIfLabel);
-                data.Assembler.nop();
                 break;
             case LexemeType.Negation:
                 pop(r14);
@@ -301,7 +303,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         data.Assembler.jmp(endIfLabel);
 
         data.Assembler.Label(ref elseBlock);
-        data.Assembler.nop();
 
         for (var i = 2; i < node.Children.Count; i++)
             if (node.Children[i].Lexeme.LexemeType == LexemeType.Elif)

@@ -1,10 +1,11 @@
 using System.Runtime.InteropServices;
 using Iced.Intel;
+using Wist.Backend.Compiler;
 using Wist.Logger;
 
 namespace Wist.Backend.Executing;
 
-public partial class WindowsAsmExecutable(Assembler asm, ILogger logger) : AsmExecutableBase(asm, logger)
+public partial class WindowsAsmExecutable(Assembler asm, IDebugData debugData, ILogger logger) : AsmExecutableBase(asm, debugData, logger)
 {
     private const uint PageExecuteReadwrite = 0x40;
     private const uint MemCommit = 0x1000;

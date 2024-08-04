@@ -1,13 +1,14 @@
 using Iced.Intel;
+using Wist.Backend.Compiler;
 using Wist.Logger;
 
 namespace Wist.Backend.Executing;
 
-public abstract class AsmExecutableBase(Assembler asm, ILogger logger) : IExecutable
+public abstract class AsmExecutableBase(Assembler asm, IDebugData debugData, ILogger logger) : IExecutable
 {
     public unsafe long Execute()
     {
-        logger.Log(AsmPrinter.PrintCodeToString(asm));
+        logger.Log(AsmPrinter.PrintCodeToString(asm, debugData));
         var functionPointer = MakeFunction<long>(out var bin);
 
         logger.Log($"Successfully compiled assembly code. " +

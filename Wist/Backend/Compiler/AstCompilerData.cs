@@ -8,5 +8,6 @@ public record AstCompilerData(
     AstVisitor AstVisitor,
     DllsManager DllsManager,
     Dictionary<string, LabelRef> Labels,
-    AstCompilerToAsmHelper Helper
+    AstCompilerToAsmHelper Helper,
+    DebugData DebugData
 );

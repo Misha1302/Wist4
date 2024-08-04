@@ -43,7 +43,6 @@ public static class LexerData
             new(Ret, "ret"),
             new(For, "for"),
             new(Spaces, "[ \t]+"),
-            new(Spaces, "[ \t]+"),
             new(NewLine, "\r?\n"),
             new(LessThan, "\\<"),
             new(GreaterThan, "\\>"),

@@ -1,24 +1,14 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    // 1 - 1/3 + 1/5 - 1/7 + 1/9... = pi
-    
-    f64 one = ToFloat64(I64ToStr(1))
-    
-    f64 pi = (one) 
-    
-    i64 d = 3
-    for (i64 i = 0) (1) (i = i + 1) (
-        f64 next = Float64Div(one, ToFloat64(I64ToStr(d)))
-        
-        if (i % 2 == 1) ( pi = Float64Add(pi, next) )
-        if (i % 2 == 0) ( pi = Float64Sub(pi, next) )
-        d = d + 2
-
+    for (int i = 0) (i <= 7) (i = i + 1) (
         WriteI64NoLn(i)
-        WriteF64(Float64Mul(pi, ToFloat64(I64ToStr(4))))
+        if (i == 2) ( WriteI64(2) )
+        elif (i == 3) ( WriteI64(3) )
+        elif (i == 4) ( WriteI64(4) )
+        elif (i == 5) ( WriteI64(5) )
+        else ( WriteI64(999) )
     )
     
-
     ret 0
 )

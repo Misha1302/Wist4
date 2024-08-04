@@ -226,16 +226,12 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.Assembler.Label(ref whileEnd);
                 break;
             case LexemeType.If:
-                data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
+                var endIfLabel = data.Assembler.CreateLabel("endIf");
 
-                pop(r14);
-                notIf = data.Assembler.CreateLabel("not_if");
-                data.Assembler.cmp(r14, 0);
-                data.Assembler.je(notIf);
+                EmitIfBlock(node, endIfLabel);
 
-                data.AstVisitor.Visit(node.Children[1], EmitMainLoop, data.Helper.NeedToVisitChildren);
-
-                data.Assembler.Label(ref notIf);
+                data.Assembler.Label(ref endIfLabel);
+                data.Assembler.nop();
                 break;
             case LexemeType.Negation:
                 pop(r14);
@@ -289,6 +285,30 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
         }
+    }
+
+    private void EmitIfBlock(AstNode node, Label endIfLabel)
+    {
+        var elseBlock = data.Assembler.CreateLabel("elseBlock");
+
+        data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
+
+        pop(r14);
+        data.Assembler.cmp(r14, 0);
+        data.Assembler.je(elseBlock);
+
+        data.AstVisitor.Visit(node.Children[1], EmitMainLoop, data.Helper.NeedToVisitChildren);
+        data.Assembler.jmp(endIfLabel);
+
+        data.Assembler.Label(ref elseBlock);
+        data.Assembler.nop();
+
+        for (var i = 2; i < node.Children.Count; i++)
+            if (node.Children[i].Lexeme.LexemeType == LexemeType.Elif)
+                EmitIfBlock(node.Children[i], endIfLabel);
+            else if (node.Children[i].Lexeme.LexemeType == LexemeType.Else)
+                data.AstVisitor.Visit(node.Children[i].Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
+            else throw new InvalidOperationException("Unknown condition type");
     }
 
     private void EmitParameters(AstNode node)

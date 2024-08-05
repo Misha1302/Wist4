@@ -127,6 +127,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 EmitIfBlock(node, endIfLabel);
 
                 data.Assembler.Label(ref endIfLabel);
+                data.Assembler.nop();
                 break;
             case LexemeType.Negation:
                 EmitNegation();
@@ -134,6 +135,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.Label:
                 var labelName = node.Lexeme.Text[..^1]; // skip ':'
                 data.Assembler.Label(ref data.Labels[labelName].LabelByRef);
+                data.Assembler.nop();
                 break;
             case LexemeType.Goto:
                 data.Assembler.jmp(data.Labels[node.Children[0].Lexeme.Text].LabelByRef);
@@ -412,6 +414,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
         data.Assembler.jmp(whileEnd);
         data.Assembler.Label(ref notIf);
+        data.Assembler.nop();
 
         // body
         data.AstVisitor.Visit(node.Children[3], EmitMainLoop, data.Helper.NeedToVisitChildren);
@@ -423,6 +426,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         data.Assembler.jmp(whileStart);
 
         data.Assembler.Label(ref whileEnd);
+        data.Assembler.nop();
     }
 
     private void StackOperate(Action i64Action, Action f64Action)
@@ -447,6 +451,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         data.Assembler.jmp(endIfLabel);
 
         data.Assembler.Label(ref elseBlock);
+        data.Assembler.nop();
 
         for (var i = 2; i < node.Children.Count; i++)
             if (node.Children[i].Lexeme.LexemeType == LexemeType.Elif)

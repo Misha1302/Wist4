@@ -9,6 +9,1000 @@ main() -> i64 (
     WriteMemI64(ptr + 4, '!')
     
     WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
+    
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
 
     ret 0
 )

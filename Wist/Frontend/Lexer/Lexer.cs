@@ -16,11 +16,14 @@ public class Lexer(string source, ILogger logger)
             .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
             .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
             .Where(x => x.match.Success)
+            .OrderBy(x => x.match.Index)
             .ToList();
 
+        var startIndex = 0;
         while (pos < source.Length)
         {
-            var match = regex.FirstOrDefault(x => x.match.Index == pos);
+            startIndex = regex.FindIndex(startIndex, x => x.match.Index == pos);
+            var match = regex[startIndex];
 
             if (match == default) throw new InvalidDataException();
 

@@ -57,10 +57,14 @@ public static class StandardLibrary
         return sb.ToString();
     }
 
-
     public static void WriteF64(double value)
     {
         Console.WriteLine(value);
+    }
+
+    public static void WriteArrayOfChars(long ptr)
+    {
+        Console.WriteLine(ArrToStr(ptr));
     }
 
     public static void WriteI64(long value)

@@ -60,6 +60,10 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.Assembler.movq(xmm0, r14);
                 data.StackManager.Push(xmm0);
                 break;
+            case LexemeType.Character:
+                data.Assembler.mov(r14, node.Lexeme.Text[1]);
+                data.StackManager.Push(r14);
+                break;
             case LexemeType.Int64:
                 data.Assembler.mov(r14, node.Lexeme.Text.ToLong());
                 data.StackManager.Push(r14);

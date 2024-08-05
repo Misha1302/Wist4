@@ -24,6 +24,7 @@ public static class LexerData
             new(Negation, "!"),
             new(NotEqual, "!="),
             new(Equal, "=="),
+            new(Character, "\'.\'"),
             new(Import, "import"),
             new(String, "\"[^\"]+\""),
             new(As, "as"),

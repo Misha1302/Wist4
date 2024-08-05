@@ -47,6 +47,7 @@ public enum LexemeType
     GettingRef,
     Modulo,
     Float64,
+    Character,
 
 
     Scope,

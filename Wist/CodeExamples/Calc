@@ -1,24 +1,14 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    // 1 - 1/3 + 1/5 - 1/7 + 1/9... = pi
-
-    f64 pi = 1.0 
-
-    f64 d = 3.0
-    for (i64 i = 0) (i < 1) (i = i + 1) (        
-        f64 next = getNext(d)
-
-        if (i % 2 == 1) ( pi = pi + next )
-        else ( pi = pi - next )
-        d = d + 2.0
+    i64 ptr = Calloc(128) + 8
     
-        WriteI64NoLn(i)
-        WriteF64(pi * 4.0)
-    )
-
+    WriteMemI64(ptr - 8, 3)
+    WriteMemI64(ptr, 'H')
+    WriteMemI64(ptr + 2, 'i')
+    WriteMemI64(ptr + 4, '!')
+    
+    WriteArrayOfChars(ptr)
 
     ret 0
 )
-
-getNext(f64 d) -> f64 ( ret 1.0 / d )

@@ -8,7 +8,7 @@ namespace Wist.Backend.Compiler;
 
 public class FunctionAstCompilerToAsm(AstCompilerData data)
 {
-    private Dictionary<string, int> _locals = null!;
+    private Dictionary<string, LocalInfo> _locals = null!;
 
     public void Compile(AstNode root)
     {
@@ -61,68 +61,111 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.StackManager.Push(r14);
                 break;
             case LexemeType.Plus:
-                var asmValueType = data.StackManager.Peek();
-                if (asmValueType == AsmValueType.Int64)
+                StackOperate(() =>
                 {
                     data.StackManager.Pop(r14);
                     data.Assembler.add(__[rsp], r14);
-                }
-                else if (asmValueType == AsmValueType.Float64)
+                }, () =>
                 {
                     data.StackManager.Pop(xmm0);
                     data.StackManager.Pop(xmm1);
                     data.Assembler.addsd(xmm0, xmm1);
                     data.StackManager.Push(xmm0);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Invalid type for this operation");
-                }
-
+                });
                 break;
             case LexemeType.Minus:
-                data.StackManager.Pop(r14);
-                data.Assembler.sub(__[rsp], r14);
+                StackOperate(() =>
+                {
+                    data.StackManager.Pop(r14);
+                    data.Assembler.sub(__[rsp], r14);
+                }, () =>
+                {
+                    data.StackManager.Pop(xmm0);
+                    data.StackManager.Pop(xmm1);
+                    data.Assembler.subsd(xmm1, xmm0);
+                    data.StackManager.Push(xmm1);
+                });
                 break;
             case LexemeType.Mul:
-                data.StackManager.Pop(r14);
-                data.StackManager.Pop(rax);
-                data.Assembler.imul(r14);
-                data.StackManager.Push(rax);
+                StackOperate(() =>
+                {
+                    data.StackManager.Pop(r14);
+                    data.StackManager.Pop(rax);
+                    data.Assembler.imul(r14);
+                    data.StackManager.Push(rax);
+                }, () =>
+                {
+                    data.StackManager.Pop(xmm0);
+                    data.StackManager.Pop(xmm1);
+                    data.Assembler.mulsd(xmm0, xmm1);
+                    data.StackManager.Push(xmm0);
+                });
+
                 break;
             case LexemeType.Div:
-                data.Assembler.mov(rdx, 0);
-                data.StackManager.Pop(r14);
-                data.StackManager.Pop(rax);
-                data.Assembler.idiv(r14);
-                data.StackManager.Push(rax);
+                StackOperate(() =>
+                {
+                    data.Assembler.mov(rdx, 0);
+                    data.StackManager.Pop(r14);
+                    data.StackManager.Pop(rax);
+                    data.Assembler.idiv(r14);
+                    data.StackManager.Push(rax);
+                }, () =>
+                {
+                    data.StackManager.Pop(xmm0);
+                    data.StackManager.Pop(xmm1);
+                    data.Assembler.divsd(xmm1, xmm0);
+                    data.StackManager.Push(xmm1);
+                });
                 break;
             case LexemeType.Ret:
-                data.StackManager.Pop(rax);
+                StackOperate(() => data.StackManager.Pop(rax), () => data.StackManager.Pop(xmm0));
                 EmitLeave();
                 data.Assembler.ret();
                 break;
             case LexemeType.Identifier:
+                var localInfo = _locals[node.Lexeme.Text];
                 if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
                 {
                     // load variable reference
                     data.Assembler.mov(r14, rbp);
-                    data.Assembler.sub(r14, _locals[node.Lexeme.Text]);
+                    data.Assembler.sub(r14, localInfo.Offset);
                     data.StackManager.Push(r14);
                 }
                 else
                 {
                     // push the value of variable
-                    data.Assembler.mov(r14, __[rbp - _locals[node.Lexeme.Text]]);
-                    data.StackManager.Push(r14);
+                    if (localInfo.Type == AsmValueType.Int64)
+                    {
+                        data.Assembler.mov(r14, __[rbp - localInfo.Offset]);
+                        data.StackManager.Push(r14);
+                    }
+                    else if (localInfo.Type == AsmValueType.Float64)
+                    {
+                        data.Assembler.movq(xmm0, __[rbp - localInfo.Offset]);
+                        data.StackManager.Push(xmm0);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException();
+                    }
                 }
 
                 break;
             case LexemeType.Set:
                 // left - address - r15, right - value -  r14
-                data.StackManager.Pop(r14);
-                data.StackManager.Pop(r15);
-                data.Assembler.mov(__[r15], r14);
+                StackOperate(() =>
+                {
+                    data.StackManager.Pop(r14);
+                    data.StackManager.Pop(r15);
+                    data.Assembler.mov(__[r15], r14);
+                }, () =>
+                {
+                    data.StackManager.Pop(xmm0);
+                    data.StackManager.Pop(r15);
+                    data.Assembler.movq(__[r15], xmm0);
+                });
+
                 break;
             case LexemeType.FunctionDeclaration:
                 if (data.Labels[node.Lexeme.Text].LabelByRef.InstructionIndex >= 0) break;
@@ -159,7 +202,12 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                     data.StackManager.Drop(deltaSp);
 
-                    data.StackManager.Push(rax);
+                    var meta = data.MetaData.Functions.First(x => x.Name == funcName);
+                    if (meta.ReturnType == AsmValueType.Int64)
+                        data.StackManager.Push(rax);
+                    else if (meta.ReturnType == AsmValueType.Float64)
+                        data.StackManager.Push(xmm0);
+                    else throw new InvalidOperationException("Invalid return type");
                 }
                 else if (data.DllsManager.HasFunction(funcName))
                 {
@@ -176,7 +224,12 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                     if (needToPushPopStub) data.StackManager.PopStub();
 
-                    if (funcToCall.returnType != typeof(void)) data.StackManager.Push(rax);
+                    if (funcToCall.returnType == typeof(long))
+                        data.StackManager.Push(rax);
+                    else if (funcToCall.returnType == typeof(double))
+                        data.StackManager.Push(xmm0);
+                    else if (funcToCall.returnType != typeof(void))
+                        throw new InvalidOperationException("Invalid return type");
                 }
                 else
                 {
@@ -186,8 +239,8 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 break;
             case LexemeType.GettingRef:
                 var referenceIdentifier = node.Children[0].Lexeme.Text;
-                if (_locals.TryGetValue(referenceIdentifier, out var localOffset))
-                    data.Assembler.lea(r14, __[rbp - localOffset]);
+                if (_locals.TryGetValue(referenceIdentifier, out var local))
+                    data.Assembler.lea(r14, __[rbp - local.Offset]);
                 else if (data.Labels.TryGetValue(referenceIdentifier, out var labelRef))
                     data.Assembler.lea(r14, __[labelRef.LabelByRef]);
                 else if (data.DllsManager.HasFunction(referenceIdentifier))
@@ -290,7 +343,6 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             case LexemeType.As:
             case LexemeType.Alias:
             case LexemeType.Is:
-            case LexemeType.PointerType:
             case LexemeType.LeftPar:
             case LexemeType.RightPar:
             case LexemeType.LeftBrace:
@@ -308,6 +360,14 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         }
 
         data.DebugData.Add(data.Assembler.Instructions.Count, node.GetScopeDepth(), node.Lexeme.ToString());
+    }
+
+    private void StackOperate(Action i64Action, Action f64Action)
+    {
+        var asmValueType = data.StackManager.Peek();
+        if (asmValueType == AsmValueType.Int64) i64Action();
+        else if (asmValueType == AsmValueType.Float64) f64Action();
+        else throw new InvalidOperationException("Invalid type for this operation");
     }
 
     private void EmitIfBlock(AstNode node, Label endIfLabel)
@@ -341,7 +401,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         foreach (var parameter in parameters)
         {
             data.Assembler.mov(r14, __[rbp + 16 + offset]);
-            data.Assembler.mov(__[rbp - _locals[parameter.Lexeme.Text]], r14);
+            data.Assembler.mov(__[rbp - _locals[parameter.Lexeme.Text].Offset], r14);
             offset += 8;
         }
     }

@@ -56,12 +56,11 @@ public static class LexerData
         var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
         var first = @$"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=(\s+{identifier}))";
         var second = @$"(?<=({arrow}\s*))(?!({keywords})){identifier}";
-        lds.Insert(0, new Ld(Type, $"({first})|({second})"));
+        lds.Insert(0, new Ld(Type, $"({first})|({second})\\*?"));
 
         lds.Insert(0, new Ld(Int32, $"{integer}s"));
         lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
-        lds.Insert(0, new Ld(PointerType, $"{identifier}\\*"));
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Label, $"{identifier}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));

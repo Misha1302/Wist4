@@ -21,14 +21,14 @@ public class ProgramAstCompilerToAsm : IAstCompiler
         var assembler = new Assembler(64);
         _data = new AstCompilerData(
             assembler, new AstVisitor(), new DllsManager(), [], new AstCompilerToAsmHelper(),
-            new DebugData.DebugData(), new StackManager(assembler)
+            new DebugData.DebugData(), new StackManager(assembler), new MetaData()
         );
     }
 
     public IExecutable Compile(AstNode root)
     {
         EmitImport(root);
-        EmitFunctionLabels(root);
+        EmitFunctions(root);
         EmitStartPoint();
         EmitFunctionCodes(root);
         return GetExecutable();
@@ -76,12 +76,18 @@ public class ProgramAstCompilerToAsm : IAstCompiler
         _data.Assembler.ret();
     }
 
-    private void EmitFunctionLabels(AstNode root)
+    private void EmitFunctions(AstNode root)
     {
         _data.AstVisitor.Visit(root, node =>
         {
-            if (node.Lexeme.LexemeType == FunctionDeclaration)
-                _data.Labels.Add(node.Lexeme.Text, new LabelRef(_data.Assembler.CreateLabel(node.Lexeme.Text)));
+            if (node.Lexeme.LexemeType != FunctionDeclaration) return;
+
+            _data.Labels.Add(node.Lexeme.Text, new LabelRef(_data.Assembler.CreateLabel(node.Lexeme.Text)));
+            var parameters = node.Children[0].Children
+                .Where(x => x.Lexeme.LexemeType == Type)
+                .Select(x => x.Lexeme.Text.ToAsmValueType()).ToList();
+            var returnType = node.Children[2].Lexeme.Text.ToAsmValueType();
+            _data.MetaData.AddFunction(new FunctionMetaData(node.Lexeme.Text, parameters, returnType));
         }, _ => true);
     }
 

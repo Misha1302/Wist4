@@ -14,28 +14,23 @@ public class AstCompilerToAsmHelper
             and not FunctionCall and not GettingRef;
     }
 
-    public (Dictionary<string, int> locals, int allocationBytes) GetInfoAboutLocals(AstNode root)
+    public (Dictionary<string, LocalInfo> locals, int allocationBytes) GetInfoAboutLocals(AstNode root)
     {
-        var localsSet = new HashSet<string>();
+        var localsSet = new HashSet<(string, AsmValueType)>();
         _astVisitor.Visit(root, node =>
             {
-                if (node.Lexeme.LexemeType == Identifier
-                    && node.Parent?.Lexeme.LexemeType == Set
-                    && node.Children.Count > 0
-                   )
-                    localsSet.Add(node.Lexeme.Text);
+                if (node.Lexeme.LexemeType != Identifier) return;
+                if (node.Children.Count <= 0) return;
+                if (node.Children[0].Lexeme.LexemeType != LexemeType.Type) return;
 
-                if (node.Lexeme.LexemeType == Identifier
-                    && node.Children.Count > 0
-                    && node.Children[0].Lexeme.LexemeType == LexemeType.Type
-                    && node.Parent?.Parent?.Lexeme.LexemeType == FunctionDeclaration
-                   )
-                    localsSet.Add(node.Lexeme.Text);
+                localsSet.Add((node.Lexeme.Text, node.Children[0].Lexeme.Text.ToAsmValueType()));
             },
             _ => true
         );
 
-        var locals = localsSet.Select((x, i) => (x, (i + 1) * 8)).ToDictionary();
+        var locals = localsSet.Select((x, i) =>
+            (x.Item1, new LocalInfo(x.Item1, (i + 1) * 8, x.Item2))
+        ).ToDictionary();
         return (locals, (localsSet.Count + localsSet.Count % 2) * 8);
     }
 }

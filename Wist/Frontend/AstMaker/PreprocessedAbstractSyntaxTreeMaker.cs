@@ -8,7 +8,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     private static readonly LexemeType[][] LexemeTypes =
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef],
-        [LexemeType.Type, PointerType],
+        [LexemeType.Type],
         [Modulo],
         [Mul, Div],
         [Plus, Minus],
@@ -33,7 +33,6 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                 switch (handlingType)
                 {
                     case LexemeType.Type:
-                    case PointerType:
                         if (astNodes.Count <= 1 || astNodes[i + 1].Children.Count != 0) continue;
                         astNodes[i + 1].AddAndRemove(astNodes, i);
                         break;

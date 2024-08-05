@@ -10,5 +10,5 @@ public record AstCompilerData(
     Dictionary<string, LabelRef> Labels,
     AstCompilerToAsmHelper Helper,
     DebugData.DebugData DebugData,
-    StackManager StackManager
-);
+    StackManager StackManager,
+    MetaData MetaData);

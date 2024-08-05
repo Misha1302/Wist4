@@ -9,7 +9,6 @@ public enum LexemeType
     Alias,
     Is,
     Type,
-    PointerType,
     Set,
     FunctionCall,
     LeftPar,

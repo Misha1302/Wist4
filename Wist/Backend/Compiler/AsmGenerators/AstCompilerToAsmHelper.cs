@@ -1,8 +1,10 @@
+using Wist.Backend.Compiler.Meta;
+using Wist.Backend.Compiler.TypeSystem;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
 using static Wist.Frontend.Lexer.Lexemes.LexemeType;
 
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.AsmGenerators;
 
 public class AstCompilerToAsmHelper
 {

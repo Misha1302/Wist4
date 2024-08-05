@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Iced.Intel;
+using Wist.Backend.Compiler.TypeSystem;
 
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.AsmGenerators;
 
 public class StackManager(Assembler assembler)
 {

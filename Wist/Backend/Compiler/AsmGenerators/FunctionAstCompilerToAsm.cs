@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using Iced.Intel;
+using Wist.Backend.Compiler.Meta;
+using Wist.Backend.Compiler.TypeSystem;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
 using InfoAboutMethod = (System.IntPtr ptr, System.Reflection.ParameterInfo[] parameters, System.Type returnType);
 
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.AsmGenerators;
 
 public class FunctionAstCompilerToAsm(AstCompilerData data)
 {

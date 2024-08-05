@@ -1,10 +1,12 @@
 using Iced.Intel;
+using Wist.Backend.Compiler.Meta;
+using Wist.Backend.Compiler.TypeSystem;
 using Wist.Backend.Executing;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.Logger;
 
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.AsmGenerators;
 
 using static LexemeType;
 

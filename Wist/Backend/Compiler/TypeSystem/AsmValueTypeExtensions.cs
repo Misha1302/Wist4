@@ -1,4 +1,4 @@
-namespace Wist.Backend.Compiler;
+namespace Wist.Backend.Compiler.TypeSystem;
 
 public static class AsmValueTypeExtensions
 {

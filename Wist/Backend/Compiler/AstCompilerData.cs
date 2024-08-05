@@ -1,4 +1,6 @@
 using Iced.Intel;
+using Wist.Backend.Compiler.AsmGenerators;
+using Wist.Backend.Compiler.Meta;
 using Wist.Frontend.AstMaker;
 
 namespace Wist.Backend.Compiler;
@@ -11,4 +13,5 @@ public record AstCompilerData(
     AstCompilerToAsmHelper Helper,
     DebugData.DebugData DebugData,
     StackManager StackManager,
-    MetaData MetaData);
+    MetaData MetaData
+);

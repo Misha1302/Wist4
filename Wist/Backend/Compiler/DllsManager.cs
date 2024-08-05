@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Wist.Backend.Compiler;
 
@@ -11,12 +10,11 @@ public class DllsManager
 
     public void Import(string path)
     {
-        var functions = Assembly.LoadFrom(path).GetTypes()
+        var functions = Assembly.LoadFrom(path)
+            .GetTypes()
+            .Where(x => x.Name.EndsWith("Library"))
             .SelectMany(x => x.GetMethods(BindingFlags.Public | BindingFlags.Static))
             .ToList();
-
-        foreach (var function in functions)
-            RuntimeHelpers.PrepareMethod(function.MethodHandle);
 
         foreach (var function in functions)
             _functions.Add(function.Name,

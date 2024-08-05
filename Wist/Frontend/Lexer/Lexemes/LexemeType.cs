@@ -47,6 +47,7 @@ public enum LexemeType
     Comment,
     GettingRef,
     Modulo,
+    Float64,
 
 
     Scope,

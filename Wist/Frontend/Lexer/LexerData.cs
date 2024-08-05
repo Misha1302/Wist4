@@ -30,7 +30,6 @@ public static class LexerData
             new(Alias, "alias"),
             new(Is, "is"),
             new(Set, "="),
-            new(Int32, "-?\\d+s"),
             new(Int64, @"-?\d+[\d_]*\d*"),
             new(Dot, "\\."),
             new(Modulo, "\\%"),
@@ -51,7 +50,7 @@ public static class LexerData
             new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
         };
 
-
+        var integer = lds.Get(Int64).Pattern;
         var identifier = lds.Get(Identifier).Pattern;
         var arrow = lds.Get(Arrow).Pattern;
         var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
@@ -59,6 +58,8 @@ public static class LexerData
         var second = @$"(?<=({arrow}\s*))(?!({keywords})){identifier}";
         lds.Insert(0, new Ld(Type, $"({first})|({second})"));
 
+        lds.Insert(0, new Ld(Int32, $"{integer}s"));
+        lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
         lds.Insert(0, new Ld(PointerType, $"{identifier}\\*"));
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));

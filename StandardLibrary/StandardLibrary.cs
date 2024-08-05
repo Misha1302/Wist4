@@ -10,25 +10,25 @@ public static class StandardLibrary
 {
     public static unsafe long Float64Add(long a, long b)
     {
-        var c = *(double*)&a + *(double*)&b;
+        var c = a.As<long, double>() + b.As<long, double>();
         return *(long*)&c;
     }
 
     public static unsafe long Float64Sub(long a, long b)
     {
-        var c = *(double*)&a - *(double*)&b;
+        var c = a.As<long, double>() - b.As<long, double>();
         return *(long*)&c;
     }
 
     public static unsafe long Float64Mul(long a, long b)
     {
-        var c = *(double*)&a * *(double*)&b;
+        var c = a.As<long, double>() * b.As<long, double>();
         return *(long*)&c;
     }
 
     public static unsafe long Float64Div(long a, long b)
     {
-        var c = *(double*)&a / *(double*)&b;
+        var c = a.As<long, double>() / b.As<long, double>();
         return *(long*)&c;
     }
 

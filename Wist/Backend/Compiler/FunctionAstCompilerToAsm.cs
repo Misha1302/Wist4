@@ -50,12 +50,14 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
     private void EmitMainLoop(AstNode node)
     {
-        data.DebugData.Add(data.Assembler.Instructions.Count, node.GetScopeDepth(), node.Lexeme.ToString());
-
         switch (node.Lexeme.LexemeType)
         {
+            case LexemeType.Float64:
+                data.Assembler.mov(r14, node.Lexeme.Text.ToDouble().As<double, long>());
+                push(r14);
+                break;
             case LexemeType.Int64:
-                data.Assembler.mov(r14, long.Parse(node.Lexeme.Text.Replace("_", "")));
+                data.Assembler.mov(r14, node.Lexeme.Text.ToLong());
                 push(r14);
                 break;
             case LexemeType.Plus:
@@ -286,6 +288,8 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
             default:
                 throw new ArgumentOutOfRangeException(node.Lexeme.ToString());
         }
+
+        data.DebugData.Add(data.Assembler.Instructions.Count, node.GetScopeDepth(), node.Lexeme.ToString());
     }
 
     private void EmitIfBlock(AstNode node, Label endIfLabel)

@@ -1,14 +1,7 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    for (int i = 0) (i <= 7) (i = i + 1) (
-        WriteI64NoLn(i)
-        if (i == 2) ( WriteI64(2) )
-        elif (i == 3) ( WriteI64(3) )
-        elif (i == 4) ( WriteI64(4) )
-        elif (i == 5) ( WriteI64(5) )
-        else ( WriteI64(999) )
-    )
+    WriteF64(123.321)
     
     ret 0
 )

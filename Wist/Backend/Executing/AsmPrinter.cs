@@ -17,21 +17,31 @@ public static class AsmPrinter
             DigitSeparator = "'",
         });
 
+        var depthLevel = 0;
         for (var i = 0; i < asm.Instructions.Count; i++)
         {
             if (debugData.TryGet(i, out var list))
                 foreach (var item in list)
                 {
-                    for (var j = 0; j < item.deepthLevel; j++)
-                        so.Write("- ", FormatterTextKind.Text);
+                    WriteDepthLevel(".#", item.depthLevel, so, " ");
                     so.Write(item.message + "\n", FormatterTextKind.Text);
+
+                    depthLevel = item.depthLevel;
                 }
 
             var instruction = asm.Instructions[i];
+            WriteDepthLevel("- ", depthLevel, so);
             formatter.Format(instruction, so);
             so.Write("\n", FormatterTextKind.Text);
         }
 
         return so.ToString()[..^1];
+    }
+
+    private static void WriteDepthLevel(string filler, int depthLevel, StringOutput so, string end = "")
+    {
+        for (var j = 0; j < depthLevel; j++)
+            so.Write(filler, FormatterTextKind.Text);
+        so.Write(end, FormatterTextKind.Text);
     }
 }

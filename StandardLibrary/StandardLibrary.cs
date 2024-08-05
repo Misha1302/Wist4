@@ -58,9 +58,9 @@ public static class StandardLibrary
     }
 
 
-    public static unsafe void WriteF64(long value)
+    public static void WriteF64(double value)
     {
-        Console.WriteLine(*(double*)&value);
+        Console.WriteLine(value);
     }
 
     public static void WriteI64(long value)

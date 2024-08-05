@@ -9,7 +9,6 @@ namespace Wist.Backend.Compiler;
 public class FunctionAstCompilerToAsm(AstCompilerData data)
 {
     private Dictionary<string, int> _locals = null!;
-    private int _sp;
 
     public void Compile(AstNode root)
     {
@@ -54,35 +53,52 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         {
             case LexemeType.Float64:
                 data.Assembler.mov(r14, node.Lexeme.Text.ToDouble().As<double, long>());
-                push(r14);
+                data.Assembler.movq(xmm0, r14);
+                data.StackManager.Push(xmm0);
                 break;
             case LexemeType.Int64:
                 data.Assembler.mov(r14, node.Lexeme.Text.ToLong());
-                push(r14);
+                data.StackManager.Push(r14);
                 break;
             case LexemeType.Plus:
-                pop(r14);
-                data.Assembler.add(__[rsp], r14);
+                var asmValueType = data.StackManager.Peek();
+                if (asmValueType == AsmValueType.Int64)
+                {
+                    data.StackManager.Pop(r14);
+                    data.Assembler.add(__[rsp], r14);
+                }
+                else if (asmValueType == AsmValueType.Float64)
+                {
+                    data.StackManager.Pop(xmm0);
+                    data.StackManager.Pop(xmm1);
+                    data.Assembler.addsd(xmm0, xmm1);
+                    data.StackManager.Push(xmm0);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Invalid type for this operation");
+                }
+
                 break;
             case LexemeType.Minus:
-                pop(r14);
+                data.StackManager.Pop(r14);
                 data.Assembler.sub(__[rsp], r14);
                 break;
             case LexemeType.Mul:
-                pop(r14);
-                pop(rax);
+                data.StackManager.Pop(r14);
+                data.StackManager.Pop(rax);
                 data.Assembler.imul(r14);
-                push(rax);
+                data.StackManager.Push(rax);
                 break;
             case LexemeType.Div:
                 data.Assembler.mov(rdx, 0);
-                pop(r14);
-                pop(rax);
+                data.StackManager.Pop(r14);
+                data.StackManager.Pop(rax);
                 data.Assembler.idiv(r14);
-                push(rax);
+                data.StackManager.Push(rax);
                 break;
             case LexemeType.Ret:
-                pop(rax);
+                data.StackManager.Pop(rax);
                 EmitLeave();
                 data.Assembler.ret();
                 break;
@@ -92,20 +108,20 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                     // load variable reference
                     data.Assembler.mov(r14, rbp);
                     data.Assembler.sub(r14, _locals[node.Lexeme.Text]);
-                    push(r14);
+                    data.StackManager.Push(r14);
                 }
                 else
                 {
                     // push the value of variable
                     data.Assembler.mov(r14, __[rbp - _locals[node.Lexeme.Text]]);
-                    push(r14);
+                    data.StackManager.Push(r14);
                 }
 
                 break;
             case LexemeType.Set:
                 // left - address - r15, right - value -  r14
-                pop(r14);
-                pop(r15);
+                data.StackManager.Pop(r14);
+                data.StackManager.Pop(r15);
                 data.Assembler.mov(__[r15], r14);
                 break;
             case LexemeType.FunctionDeclaration:
@@ -115,6 +131,9 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                 EmitEnter();
                 EmitStack(node);
+
+                data.Assembler.vzeroupper();
+
                 EmitParameters(node);
 
                 data.AstVisitor.Visit(node, EmitMainLoop, data.Helper.NeedToVisitChildren);
@@ -125,23 +144,22 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                 if (data.Labels.TryGetValue(funcName, out var funcLabel))
                 {
-                    var startSp = _sp;
+                    var startSp = data.StackManager.Sp;
                     var argsCount = node.Children[0].Children.Count;
                     var presumablyEndSp = startSp + argsCount * 8;
-                    if (presumablyEndSp % 16 != 0) pushStub();
+                    if (presumablyEndSp % 16 != 0) data.StackManager.PushStub();
 
                     data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren, true);
-                    var endSp = _sp;
+                    var endSp = data.StackManager.Sp;
                     var deltaSp = endSp - startSp;
 
-                    Debug.Assert(_sp % 16 == 0);
+                    Debug.Assert(data.StackManager.Sp % 16 == 0);
 
                     data.Assembler.call(funcLabel.LabelByRef);
 
-                    data.Assembler.add(rsp, deltaSp);
-                    _sp -= deltaSp;
+                    data.StackManager.Drop(deltaSp);
 
-                    push(rax);
+                    data.StackManager.Push(rax);
                 }
                 else if (data.DllsManager.HasFunction(funcName))
                 {
@@ -151,14 +169,14 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                     LoadArgumentsToRegisters(funcToCall);
 
-                    var needToPushPopStub = _sp % 16 != 0;
-                    if (needToPushPopStub) pushStub();
+                    var needToPushPopStub = data.StackManager.Sp % 16 != 0;
+                    if (needToPushPopStub) data.StackManager.PushStub();
 
                     DirectCall((ulong)funcToCall.ptr);
 
-                    if (needToPushPopStub) popStub();
+                    if (needToPushPopStub) data.StackManager.PopStub();
 
-                    if (funcToCall.returnType != typeof(void)) push(rax);
+                    if (funcToCall.returnType != typeof(void)) data.StackManager.Push(rax);
                 }
                 else
                 {
@@ -176,7 +194,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                     data.Assembler.mov(r14, data.DllsManager.GetPointerOf(referenceIdentifier).ptr);
                 else throw new InvalidOperationException();
 
-                push(r14);
+                data.StackManager.Push(r14);
                 break;
             case LexemeType.Equal:
                 LogicOp(data.Assembler.cmove);
@@ -211,7 +229,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
                 // condition
                 data.AstVisitor.Visit(node.Children[1], EmitMainLoop, data.Helper.NeedToVisitChildren);
-                pop(r14);
+                data.StackManager.Pop(r14);
                 data.Assembler.cmp(r14, 0);
                 data.Assembler.jne(notIf);
 
@@ -237,7 +255,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.Assembler.Label(ref endIfLabel);
                 break;
             case LexemeType.Negation:
-                pop(r14);
+                data.StackManager.Pop(r14);
                 data.Assembler.mov(r13, 0);
                 data.Assembler.mov(r15, 1);
 
@@ -245,7 +263,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 data.Assembler.cmove(r14, r15);
                 data.Assembler.cmovne(r14, r13);
 
-                push(r14);
+                data.StackManager.Push(r14);
                 break;
             case LexemeType.Label:
                 var labelName = node.Lexeme.Text[..^1]; // skip ':'
@@ -256,10 +274,10 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
                 break;
             case LexemeType.Modulo:
                 data.Assembler.mov(rdx, 0);
-                pop(r14);
-                pop(rax);
+                data.StackManager.Pop(r14);
+                data.StackManager.Pop(rax);
                 data.Assembler.idiv(r14);
-                push(rdx);
+                data.StackManager.Push(rdx);
                 break;
             case LexemeType.Arrow:
             case LexemeType.Type:
@@ -298,7 +316,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
 
         data.AstVisitor.Visit(node.Children[0], EmitMainLoop, data.Helper.NeedToVisitChildren);
 
-        pop(r14);
+        data.StackManager.Pop(r14);
         data.Assembler.cmp(r14, 0);
         data.Assembler.je(elseBlock);
 
@@ -331,7 +349,7 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
     private void DirectCall(ulong ptr)
     {
         if (OS.IsWindows()) data.Assembler.sub(rsp, 32);
-        Debug.Assert(_sp % 16 == 0);
+        Debug.Assert(data.StackManager.Sp % 16 == 0);
         data.Assembler.call(ptr);
         if (OS.IsWindows()) data.Assembler.add(rsp, 32);
     }
@@ -342,62 +360,39 @@ public class FunctionAstCompilerToAsm(AstCompilerData data)
         {
             // System V AMD64 ABI
             // https://en.wikipedia.org/wiki/X86_calling_conventions
-            if (funcToCall.parameters.Length >= 1) pop(rdi);
-            if (funcToCall.parameters.Length >= 2) pop(rsi);
-            if (funcToCall.parameters.Length >= 3) pop(rdx);
-            if (funcToCall.parameters.Length >= 4) pop(rcx);
-            if (funcToCall.parameters.Length >= 5) pop(r8);
-            if (funcToCall.parameters.Length >= 6) pop(r9);
-            if (funcToCall.parameters.Length >= 7) throw new InvalidOperationException("Too many arguments");
+
+            var registers = (List<(AssemblerRegister64 i64, AssemblerRegisterXMM f64)>)
+                [(rdi, xmm0), (rsi, xmm1), (rdx, xmm2), (rcx, xmm3), (r8, xmm4), (r9, xmm5)];
+
+            for (var i = 0; i < funcToCall.parameters.Length; i++)
+                if (funcToCall.parameters.Length >= i + 1)
+                    if (data.StackManager.Peek() == AsmValueType.Int64)
+                        data.StackManager.Pop(registers[i].i64);
+                    else data.StackManager.Pop(registers[i].f64);
         }
         else
         {
             // Microsoft x64 calling convention
             // https://en.wikipedia.org/wiki/X86_calling_conventions
-            if (funcToCall.parameters.Length >= 1) pop(rcx);
-            if (funcToCall.parameters.Length >= 2) pop(rdx);
-            if (funcToCall.parameters.Length >= 3) pop(r8);
-            if (funcToCall.parameters.Length >= 4) pop(r9);
-            if (funcToCall.parameters.Length >= 5) throw new InvalidOperationException("Too many arguments");
+            var registers = (List<(AssemblerRegister64 i64, AssemblerRegisterXMM f64)>)
+                [(rcx, xmm0), (rdx, xmm1), (r8, xmm2), (r9, xmm3)];
+
+            for (var i = 0; i < funcToCall.parameters.Length; i++)
+                if (funcToCall.parameters.Length >= i + 1)
+                    if (data.StackManager.Peek() == AsmValueType.Int64)
+                        data.StackManager.Pop(registers[i].i64);
+                    else data.StackManager.Pop(registers[i].f64);
         }
     }
 
     private void LogicOp(Action<AssemblerRegister64, AssemblerRegister64> asmOp)
     {
-        pop(r14);
-        pop(r15);
+        data.StackManager.Pop(r14);
+        data.StackManager.Pop(r15);
         data.Assembler.cmp(r15, r14);
         data.Assembler.mov(r14, 0);
         data.Assembler.mov(r15, 1);
         asmOp(r14, r15);
-        push(r14);
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private void popStub()
-    {
-        _sp -= 8;
-        data.Assembler.add(rsp, 8);
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private void pushStub()
-    {
-        _sp += 8;
-        data.Assembler.sub(rsp, 8);
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private void pop(AssemblerRegister64 register)
-    {
-        _sp -= 8;
-        data.Assembler.pop(register);
-    }
-
-    // ReSharper disable once InconsistentNaming
-    private void push(AssemblerRegister64 register)
-    {
-        _sp += 8;
-        data.Assembler.push(register);
+        data.StackManager.Push(r14);
     }
 }

@@ -8,12 +8,22 @@ namespace Wist.Backend.Compiler;
 
 using static LexemeType;
 
-public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
+public class ProgramAstCompilerToAsm : IAstCompiler
 {
-    private readonly AstCompilerData _data = new(
-        new Assembler(64), new AstVisitor(), new DllsManager(), [], new AstCompilerToAsmHelper(),
-        new DebugData.DebugData()
-    );
+    private readonly AstCompilerData _data;
+
+    private readonly ILogger _logger;
+
+    public ProgramAstCompilerToAsm(ILogger logger)
+    {
+        _logger = logger;
+
+        var assembler = new Assembler(64);
+        _data = new AstCompilerData(
+            assembler, new AstVisitor(), new DllsManager(), [], new AstCompilerToAsmHelper(),
+            new DebugData.DebugData(), new StackManager(assembler)
+        );
+    }
 
     public IExecutable Compile(AstNode root)
     {
@@ -27,9 +37,9 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
     private IExecutable GetExecutable()
     {
         return OS.IsLinux()
-            ? new LinuxAsmExecutable(_data.Assembler, _data.DebugData, logger)
+            ? new LinuxAsmExecutable(_data.Assembler, _data.DebugData, _logger)
             : OS.IsWindows()
-                ? new WindowsAsmExecutable(_data.Assembler, _data.DebugData, logger)
+                ? new WindowsAsmExecutable(_data.Assembler, _data.DebugData, _logger)
                 : throw new InvalidOperationException("No supported executable for this OS");
     }
 

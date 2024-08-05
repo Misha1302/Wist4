@@ -1,7 +1,8 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    WriteF64(123.321)
+    WriteF64(123.321 + 76.888)
+    WriteI64(3 + 5)
     
     ret 0
 )

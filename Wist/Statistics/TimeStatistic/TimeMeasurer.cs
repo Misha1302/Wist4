@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Wist.Logger;
 
 namespace Wist.Statistics.TimeStatistic;
@@ -14,6 +15,7 @@ public class TimeMeasurer(ILogger logger)
         _methodName = methodName;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public void End()
     {
         _sw.Stop();

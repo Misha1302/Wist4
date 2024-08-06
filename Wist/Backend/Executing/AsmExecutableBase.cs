@@ -15,8 +15,11 @@ public abstract class AsmExecutableBase(Assembler asm, IDebugData debugData, ILo
                    $"Address: 0x{(ulong)functionPointer:x8}. " +
                    $"Size in bytes: {bin.Length}");
 
-        DebugCollectGarbage();
+        // IDK why, but if gc collection our garbage, program works correctly. Otherwise, exit code usually is 139
+        GC.Collect();
         var exitCode = functionPointer();
+        // but if gc collect garbage here, exit code usually is 139 again
+        // GC.Collect();
 
         logger.Log($"Program {(exitCode == 0 ? "successfully finished" : "failed")} with exit code {exitCode}");
 
@@ -28,15 +31,6 @@ public abstract class AsmExecutableBase(Assembler asm, IDebugData debugData, ILo
         var stream = new MemoryStream();
         asm.Assemble(new StreamCodeWriter(stream), 0);
         return stream.ToArray();
-    }
-
-    private static void DebugCollectGarbage()
-    {
-#if DEBUG
-        GC.Collect(0, GCCollectionMode.Forced, true);
-        GC.Collect(1, GCCollectionMode.Forced, true);
-        GC.Collect(2, GCCollectionMode.Forced, true);
-#endif
     }
 
     public abstract unsafe delegate*<T> MakeFunction<T>(out byte[] bin);

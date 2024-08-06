@@ -12,13 +12,22 @@ public class DllsManager
     {
         var functions = Assembly.LoadFrom(path)
             .GetTypes()
-            .Where(x => x.Name.EndsWith("Library"))
-            .SelectMany(x => x.GetMethods(BindingFlags.Public | BindingFlags.Static))
-            .ToList();
+            .Where(x => x.Name.EndsWith("Library") || x.Name.EndsWith("Lib"))
+            .Select(x =>
+            {
+                var fieldInfo = x.GetField("Prefix");
+                return (type: x, prefix: fieldInfo?.GetValue(null) ?? "");
+            })
+            .Select(x =>
+                (x.prefix, methods: x.type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            );
 
         foreach (var function in functions)
-            _functions.Add(function.Name,
-                (function.MethodHandle.GetFunctionPointer(), function.GetParameters(), function.ReturnType));
+        foreach (var method in function.methods)
+            _functions.Add(
+                function.prefix + method.Name,
+                (method.MethodHandle.GetFunctionPointer(), method.GetParameters(), method.ReturnType)
+            );
     }
 
     public InfoAboutMethod GetPointerOf(string functionName)

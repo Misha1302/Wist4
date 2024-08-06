@@ -48,7 +48,7 @@ public static class LexerData
             new(GreaterThan, "\\>"),
             new(Comma, ","),
             new(Minus, @"\-"),
-            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9]*"),
+            new(Identifier, "[a-zA-Z_][a-zA-Z_0-9:]*(?!(:))"),
         };
 
         var integer = lds.Get(Int64).Pattern;
@@ -63,9 +63,11 @@ public static class LexerData
         lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
-        lds.Insert(0, new Ld(Label, $"{identifier}:"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
         lds.Insert(0, new Ld(FunctionDeclaration, $@"{identifier}\s*(?=(\(\s*[a-zA-Z0-9\s,]*\)\s*\-\>))"));
+
+
+        lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9]))"));
 
         return lds;
     }

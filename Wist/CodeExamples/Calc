@@ -1,15 +1,11 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
+    i64 a = 999
+    i64 q = 10 * (1 + 2 + 3 + 4 + 5 + 6) * a / (3 * 2)
+    Console:Write(Str:I64ToStr(q))
     
-    i64 q = Str:I64ToStr(-33)
-    for (i64 i = 0) (i < 100_000_000) (i = i + 1) (
-        i64 s = Str:I64ToStr(i)
-        // Console:Write(s)
-        Allocator:Free(s)
-    )
-    Console:Write(q)
-    Allocator:Free(q)
+    // it optimize into 'Console:Write(Str:I64ToStr(34965))'!
 
     ret 0
 )

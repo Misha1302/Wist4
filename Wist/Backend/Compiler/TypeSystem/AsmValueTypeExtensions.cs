@@ -2,7 +2,7 @@ namespace Wist.Backend.Compiler.TypeSystem;
 
 public static class AsmValueTypeExtensions
 {
-    private static readonly Dictionary<string, AsmValueType> TypeAliases = new()
+    private static readonly Dictionary<string, AsmValueType> _typeAliases = new()
     {
         ["long"] = AsmValueType.Int64,
         ["double"] = AsmValueType.Float64,
@@ -12,6 +12,6 @@ public static class AsmValueTypeExtensions
 
     public static AsmValueType ToAsmValueType(this string alias)
     {
-        return TypeAliases[alias];
+        return _typeAliases[alias];
     }
 }

@@ -8,15 +8,15 @@ public static class StringOperationsLib
 {
     public static readonly string Prefix = "Str:";
 
-    private static readonly StringBuilder Sb = new(16);
+    private static readonly StringBuilder _sb = new(16);
 
     public static unsafe string ArrToStr(long ptr)
     {
-        Sb.Clear();
+        _sb.Clear();
         var len = MemoryOperationsLib.ReadMemI64(ptr - 8);
         for (var i = 0; i < len; i++)
-            Sb.Append(Unsafe.Read<char>((void*)(ptr + i * sizeof(char))));
-        return Sb.ToString();
+            _sb.Append(Unsafe.Read<char>((void*)(ptr + i * sizeof(char))));
+        return _sb.ToString();
     }
 
 

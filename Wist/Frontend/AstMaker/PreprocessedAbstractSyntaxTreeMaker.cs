@@ -6,7 +6,7 @@ namespace Wist.Frontend.AstMaker;
 
 public static class PreprocessedAbstractSyntaxTreeMaker
 {
-    private static readonly HashSet<LexemeType>[] LexemeTypes =
+    private static readonly HashSet<LexemeType>[] _lexemeTypes =
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef],
         [LexemeType.Type],
@@ -26,7 +26,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static void MakeOperationsNodes(List<AstNode> astNodes, int lexemeIndex)
     {
-        var lexemeTypes = LexemeTypes[lexemeIndex];
+        var lexemeTypes = _lexemeTypes[lexemeIndex];
 
         for (var i = 0; i < astNodes.Count; i++)
         {
@@ -41,7 +41,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
         for (var index = 0; index < astNodes.Count; index++)
             MakeOperationsNodes(astNodes[index].Children, lexemeIndex);
 
-        if (lexemeIndex + 1 < LexemeTypes.Length)
+        if (lexemeIndex + 1 < _lexemeTypes.Length)
             MakeOperationsNodes(astNodes, lexemeIndex + 1);
     }
 

@@ -2,9 +2,21 @@
 
 namespace Wist.Frontend.AstMaker;
 
-public record AstNode(Lexeme Lexeme, List<AstNode> Children, AstNode? Parent)
+public class AstNode(Lexeme lexeme, List<AstNode> children, AstNode? parent, int number)
 {
-    public AstNode? Parent = Parent;
+    public readonly int Number = number;
+    public List<AstNode> Children = children;
+    public Lexeme Lexeme = lexeme;
+    public AstNode? Parent = parent;
+
+    public override int GetHashCode()
+    {
+        // ReSharper disable NonReadonlyMemberInGetHashCode
+        return Children.Aggregate(
+            Lexeme.GetHashCode(),
+            (a, b) => a ^ b.GetHashCode()
+        );
+    }
 
     public override string ToString()
     {

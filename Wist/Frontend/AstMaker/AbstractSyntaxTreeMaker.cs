@@ -13,7 +13,7 @@ public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
         // 2. the further away the type of operation is in _lexemeTypes,
         // the later it will process its children - this can set the order of operations
 
-        _root = new AstNode(new Lexeme(LexemeType.Scope, "."), [], null);
+        _root = new AstNode(new Lexeme(LexemeType.Scope, "."), [], null, -1);
 
         MakeLinearNodes();
         MakeParsScopes(0);
@@ -67,7 +67,8 @@ public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
 
             _root.Children.RemoveAt(i);
 
-            var scopeNode = new AstNode(new Lexeme(LexemeType.Scope, "."), children, _root);
+            var scopeNode = new AstNode(new Lexeme(LexemeType.Scope, "."), children, _root,
+                _root.Children[startIndex].Number);
             children.SetParent(scopeNode);
 
             _root.Children.Insert(i, scopeNode);
@@ -76,6 +77,15 @@ public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
 
     private void MakeLinearNodes()
     {
-        _root.Children.AddRange(lexemes.Select(x => new AstNode(x, [], _root)).ToList());
+        var i = 0;
+
+        _root.Children.AddRange(lexemes.Select(x => new AstNode(x, [], _root, NextNumber())).ToList());
+
+        return;
+
+        int NextNumber()
+        {
+            return i++;
+        }
     }
 }

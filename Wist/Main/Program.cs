@@ -58,7 +58,7 @@ public static class Program
 
     private static void ExecuteAstOptimizer()
     {
-        var astOptimizer = new AstOptimizerStub();
+        var astOptimizer = new BasicAstOptimizer(_logger);
         _optimizedRoot = astOptimizer.OptimizeAst(_astRoot);
     }
 

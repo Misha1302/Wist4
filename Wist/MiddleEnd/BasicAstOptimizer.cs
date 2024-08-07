@@ -3,6 +3,7 @@ using Wist.Backend.Compiler;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.Logger;
+using static Wist.Frontend.Lexer.Lexemes.LexemeType;
 
 namespace Wist.MiddleEnd;
 
@@ -35,18 +36,18 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
         var curFunctionName = string.Empty;
         _astVisitor.Visit(root, node =>
         {
-            if (node.Lexeme.LexemeType == LexemeType.FunctionDeclaration)
+            if (node.Lexeme.LexemeType == FunctionDeclaration)
             {
                 curFunctionName = node.Lexeme.Text;
                 return;
             }
 
-            if (node.Lexeme.LexemeType == LexemeType.Identifier
-                && node.Parent?.Lexeme.LexemeType != LexemeType.Set
+            if (node.Lexeme.LexemeType == Identifier
+                && node.Parent?.Lexeme.LexemeType != Set
                 && knownLocalsSetters.ContainsKey(curFunctionName + "<>" + node.Lexeme.Text))
                 usedLocals.Add(curFunctionName + "<>" + node.Lexeme.Text);
 
-            if (node.Lexeme.LexemeType != LexemeType.Set) return;
+            if (node.Lexeme.LexemeType != Set) return;
             var first = node.Children[0];
             if (first.Children.Count != 1 || first.Children[0].Lexeme.LexemeType != LexemeType.Type) return;
 
@@ -82,7 +83,7 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
             for (var index = 0; index < node.Children.Count; index++)
             {
                 var child = node.Children[index];
-                if (child.Lexeme.LexemeType == LexemeType.Scope && child.Children.Count == 1)
+                if (child.Lexeme.LexemeType == Scope && child.Children.Count == 1)
                     node.Children[index] = node.Children[index].Children[0];
             }
         }, _ => true);
@@ -90,33 +91,42 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
 
     private void InlineLocals(AstNode root)
     {
-        var knownLocals =
-            new Dictionary<string, (AstNode value, int minNumberOfApplicability, int maxNumberOfApplicability)>();
+        var knownLocals = new Dictionary<string, RefTuple<AstNode, int, int>>();
+        RefTuple<AstNode, int, int> value;
 
         _astVisitor.Visit(root, node =>
         {
-            if (node.Lexeme.LexemeType != LexemeType.Set) return;
+            if (node.Lexeme.LexemeType == Identifier
+                && node.Children.Count > 0
+                && node.Children[0].Lexeme.LexemeType == LexemeType.Type
+               )
+                if (knownLocals.TryGetValue(node.Lexeme.Text, out value!))
+                    if (value.Item3 == int.MaxValue)
+                        value.Item3 = node.Number - 1;
+
+            if (node.Lexeme.LexemeType != Set) return;
             var localValue = node.Children[1];
             if (!localValue.Lexeme.LexemeType.IsConst()) return;
-            if (knownLocals.TryGetValue(node.Children[0].Lexeme.Text, out var value))
+            if (knownLocals.TryGetValue(node.Children[0].Lexeme.Text, out value!))
             {
-                if (value.maxNumberOfApplicability == int.MaxValue)
-                    value.maxNumberOfApplicability = node.Number;
+                if (value.Item3 == int.MaxValue)
+                    value.Item3 = node.Number;
                 return;
             }
 
-            knownLocals.Add(node.Children[0].Lexeme.Text, (localValue, localValue.Number + 1, int.MaxValue));
+            knownLocals.Add(node.Children[0].Lexeme.Text,
+                new RefTuple<AstNode, int, int>(localValue, localValue.Number + 1, int.MaxValue));
         }, _ => true);
 
         _astVisitor.Visit(root, node =>
         {
-            if (node.Lexeme.LexemeType != LexemeType.Identifier) return;
-            if (!knownLocals.TryGetValue(node.Lexeme.Text, out var value)) return;
-            if (node.Number < value.minNumberOfApplicability) return;
-            if (node.Number > value.maxNumberOfApplicability) return;
+            if (node.Lexeme.LexemeType != Identifier) return;
+            if (!knownLocals.TryGetValue(node.Lexeme.Text, out var local)) return;
+            if (node.Number < local.Item2) return;
+            if (node.Number > local.Item3) return;
 
-            node.Children = value.value.Children;
-            node.Lexeme = value.value.Lexeme;
+            node.Children = local.Item1.Children;
+            node.Lexeme = local.Item1.Lexeme;
         }, _ => true);
     }
 
@@ -129,18 +139,18 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
             var left = node.Children[0];
             var right = node.Children[1];
 
-            if (left.Lexeme.LexemeType is not LexemeType.Int64 and not LexemeType.Float64) return;
-            if (right.Lexeme.LexemeType is not LexemeType.Int64 and not LexemeType.Float64) return;
+            if (left.Lexeme.LexemeType is not LexemeType.Int64 and not Float64) return;
+            if (right.Lexeme.LexemeType is not LexemeType.Int64 and not Float64) return;
             if (left.Lexeme.LexemeType != right.Lexeme.LexemeType)
                 throw new InvalidOperationException("Types must equal each other");
 
-            if (node.Lexeme.LexemeType == LexemeType.Plus)
+            if (node.Lexeme.LexemeType == Plus)
                 Operate(node, left, right, (a, b) => a + b, (a, b) => a + b);
-            else if (node.Lexeme.LexemeType == LexemeType.Minus)
+            else if (node.Lexeme.LexemeType == Minus)
                 Operate(node, left, right, (a, b) => a - b, (a, b) => a - b);
-            else if (node.Lexeme.LexemeType == LexemeType.Mul)
+            else if (node.Lexeme.LexemeType == Mul)
                 Operate(node, left, right, (a, b) => a * b, (a, b) => a * b);
-            else if (node.Lexeme.LexemeType == LexemeType.Div)
+            else if (node.Lexeme.LexemeType == Div)
                 Operate(node, left, right, (a, b) => a / b, (a, b) => a / b);
         }, _ => true);
 

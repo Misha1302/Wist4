@@ -10,8 +10,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef],
         [LexemeType.Type],
-        [Modulo],
-        [Mul, Div],
+        [Mul, Div, Modulo],
         [Plus, Minus],
         [Equal, NotEqual],
         [LessThan, GreaterThan, LessOrEquals, GreaterOrEquals],

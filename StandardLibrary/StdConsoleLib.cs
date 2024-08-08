@@ -14,9 +14,10 @@ public static class StdConsoleLib
         Console.WriteLine(StringOperationsLib.ArrToStr(strPtr));
     }
 
-    public static long ReadI64()
+    public static long Read()
     {
-        return Convert.ToInt64(Console.ReadLine());
+        var s = Console.ReadLine();
+        return s != null ? StringOperationsLib.StringToCharArray(s) : 0;
     }
 
     public static void SetColor(long color)

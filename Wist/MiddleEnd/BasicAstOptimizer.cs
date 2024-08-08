@@ -16,16 +16,54 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
     {
         DoWhileHaveChanges(root, () =>
         {
+            DoWhileHaveChanges(root, () =>
+            {
+                InlineLocals(root);
+                SimplifyUnnecessaryScopesInExpressions(root);
+            });
+            RearrangeUnknownVariablesToHelpPrecomputations(root);
             Precompute(root);
-            InlineLocals(root);
             RemoveUnnecessaryLocals(root);
-            DoWhileHaveChanges(root, () => SimplifyUnnecessaryScopesInExpressions(root));
+
             _statistics.OptimizeCyclesCalledCount++;
         });
 
         MakeLogs(root);
 
         return root;
+    }
+
+    private void RearrangeUnknownVariablesToHelpPrecomputations(AstNode root)
+    {
+        _astVisitor.Visit(root, node =>
+        {
+            if (!node.Lexeme.LexemeType.IsOperation()) return;
+
+            var chainType = node.Lexeme.LexemeType;
+            if (chainType is not Mul and not Plus) return;
+
+            var childType = node.Children[1].Lexeme.LexemeType;
+            if (childType.IsConst() || childType.IsOperation()) return;
+
+
+            var top = node;
+            while (top.Parent?.Lexeme.LexemeType == chainType)
+                top = top.Parent!;
+            if (top == node) return;
+
+
+            var lowerChild = node.Children[0];
+            var parent = node.Parent!;
+            lowerChild.Parent = parent;
+            parent.Children[0] = lowerChild;
+
+
+            top.Parent!.Children[^1] = node;
+            node.Parent = top.Parent;
+            node.Children[0] = top;
+            top.Parent = node;
+            _ = 5;
+        }, _ => true);
     }
 
     private void RemoveUnnecessaryLocals(AstNode root)
@@ -84,7 +122,10 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
             {
                 var child = node.Children[index];
                 if (child.Lexeme.LexemeType == Scope && child.Children.Count == 1)
+                {
+                    node.Children[index].Children[0].Parent = node.Children[index].Parent;
                     node.Children[index] = node.Children[index].Children[0];
+                }
             }
         }, _ => true);
     }
@@ -152,6 +193,8 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
                 Operate(node, left, right, (a, b) => a * b, (a, b) => a * b);
             else if (node.Lexeme.LexemeType == Div)
                 Operate(node, left, right, (a, b) => a / b, (a, b) => a / b);
+            else if (node.Lexeme.LexemeType == Modulo)
+                Operate(node, left, right, (a, b) => a % b, (a, b) => a % b);
         }, _ => true);
 
         return;
@@ -166,6 +209,7 @@ public class BasicAstOptimizer(ILogger logger) : IAstOptimizer
                 : doubleFunction(Float0(), Float1()).ToString(CultureInfo.CurrentCulture);
 
             node.Children.Clear();
+            return;
 
             long Int0()
             {

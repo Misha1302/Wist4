@@ -4,7 +4,6 @@ using Wist.Backend.AstToIrCompiler;
 using Wist.Backend.IrToAsmCompiler.AsmGenerators.CallingConventions;
 using Wist.Backend.IrToAsmCompiler.Meta;
 using Wist.Backend.IrToAsmCompiler.TypeSystem;
-using Wist.Frontend.AstMaker;
 
 namespace Wist.Backend.IrToAsmCompiler.AsmGenerators;
 
@@ -139,6 +138,9 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
                 data.StackManager.Pop(r14);
                 data.Assembler.cmp(r14, 0);
                 data.Assembler.je(data.Labels[instruction.Get<string>()].LabelByRef);
+                break;
+            case IrType.GetReference:
+                EmitGetRef(instruction.Get<string>());
                 break;
             case IrType.CallSharpFunction:
                 var funcToCall = data.Image.DllsManager.GetPointerOf(instruction.Get<string>());
@@ -306,16 +308,15 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         EmitParameters();
     }
 
-    private void EmitGetRef(AstNode node)
+    private void EmitGetRef(string identifier)
     {
-        var referenceIdentifier = node.Children[0].Lexeme.Text;
-        if (_locals.TryGetValue(referenceIdentifier, out var local))
+        if (_locals.TryGetValue(identifier, out var local))
             data.Assembler.lea(r14, __[rbp - local.Offset]);
-        else if (data.Labels.TryGetValue(referenceIdentifier, out var labelRef))
+        else if (data.Labels.TryGetValue(identifier, out var labelRef))
             data.Assembler.lea(r14, __[labelRef.LabelByRef]);
-        else if (data.Image.DllsManager.HaveFunction(referenceIdentifier))
-            data.Assembler.mov(r14, data.Image.DllsManager.GetPointerOf(referenceIdentifier).ptr);
-        else throw new InvalidOperationException();
+        else if (data.Image.DllsManager.HaveFunction(identifier))
+            data.Assembler.mov(r14, data.Image.DllsManager.GetPointerOf(identifier).ptr);
+        else throw new InvalidOperationException($"Unknown identifier {identifier} to get reference");
 
         data.StackManager.Push(r14);
     }
@@ -355,7 +356,7 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         {
             var registers = CallConventions.SystemVAmd64Abi.ArgumentRegisters;
 
-            for (var i = 0; i < argsCount; i++)
+            for (var i = argsCount - 1; i >= 0; i--)
                 if (data.StackManager.Peek() == AsmValueType.Int64)
                     data.StackManager.Pop(registers[i].i64);
                 else data.StackManager.Pop(registers[i].f64);
@@ -364,7 +365,7 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         {
             var registers = CallConventions.MicrosoftX64.ArgumentRegisters;
 
-            for (var i = 0; i < argsCount; i++)
+            for (var i = argsCount - 1; i >= 0; i--)
                 if (data.StackManager.Peek() == AsmValueType.Int64)
                     data.StackManager.Pop(registers[i].i64);
                 else data.StackManager.Pop(registers[i].f64);

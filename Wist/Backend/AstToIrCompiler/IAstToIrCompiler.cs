@@ -60,4 +60,6 @@ public enum IrType
     DefineLabel,
     Br,
     BrFalse,
+
+    GetReference,
 }

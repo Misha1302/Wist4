@@ -88,6 +88,9 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 // remove "
                 _image.DllsManager.Import(node.Children[0].Lexeme.Text[1..^1]);
                 break;
+            case GettingRef:
+                Instructions.Add(new IrInstruction(IrType.GetReference, Invalid, node.Children[0].Lexeme.Text));
+                break;
             case FunctionDeclaration:
                 _function = _image.Functions.First(x => x.Name == node.Lexeme.Text);
                 DefineLocalsInFunction(node);
@@ -162,6 +165,10 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case FunctionCall:
                 _visitor.Visit(node.Children[0], HandleNode, _helper.NeedToVisitChildren);
                 var isSharpFunc = _image.DllsManager.HaveFunction(text);
+                var isJustFunc = _image.Functions.Any(x => x.Name == text);
+                if (!isSharpFunc && !isJustFunc)
+                    throw new InvalidOperationException($"Function {text} is unknown. Did you forgot write namespace?");
+
                 if (isSharpFunc)
                     Instructions.Add(new IrInstruction(IrType.CallSharpFunction, Invalid, text));
                 else Instructions.Add(new IrInstruction(IrType.CallFunction, Invalid, text));
@@ -194,7 +201,6 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case NewLine:
             case Comma:
             case For:
-            case GettingRef:
             default:
                 throw new InvalidOperationException($"{node.Lexeme}");
         }

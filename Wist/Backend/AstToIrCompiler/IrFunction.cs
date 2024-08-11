@@ -11,7 +11,11 @@ public record IrFunction(
 {
     public List<string> GetLabels()
     {
-        return Instructions.Where(x => x.Instruction == IrType.DefineLabel).Select(x => x.Get<string>()).ToList();
+        var labels = Instructions
+            .Where(x => x.Instruction == IrType.DefineLabel)
+            .Select(x => x.Get<string>())
+            .ToList();
+        return labels;
     }
 
     public override string ToString()

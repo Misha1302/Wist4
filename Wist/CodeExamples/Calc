@@ -8,10 +8,17 @@ while_start:
     
     if (i >= 5) ( goto while_end )
     
+    f(i)
     i = i + 1
 
     goto while_start
 while_end:
 
     ret i
+)
+
+
+f(i64 x) -> none (
+    Console:Write(Str:I64ToStr(x))
+    ret 0
 )

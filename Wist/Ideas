@@ -1,3 +1,1 @@
-Write stack-based bytecode
-
 code -> ?preprocessor -> lexer -> astMaker -> ?astOptimizer -> astCompilerToIr -> ?irOptimizer -> irCompilerToAsm

@@ -21,4 +21,9 @@ public class ImprovedStack<T> : Stack<T>
         Push(pair.first);
         return pair.first;
     }
+
+    public void Pop1(T plannedToPop)
+    {
+        Debug.Assert(Equals(Pop(), plannedToPop));
+    }
 }

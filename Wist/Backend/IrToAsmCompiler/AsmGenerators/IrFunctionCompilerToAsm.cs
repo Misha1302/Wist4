@@ -5,18 +5,16 @@ using Wist.Backend.IrToAsmCompiler.AsmGenerators.CallingConventions;
 using Wist.Backend.IrToAsmCompiler.Meta;
 using Wist.Backend.IrToAsmCompiler.TypeSystem;
 using Wist.Frontend.AstMaker;
-using Wist.Frontend.Lexer.Lexemes;
-using InfoAboutMethod = (System.IntPtr ptr, System.Reflection.ParameterInfo[] parameters, System.Type returnType);
 
 namespace Wist.Backend.IrToAsmCompiler.AsmGenerators;
 
 public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionData)
 {
-    private const int PrologSizeInBytes = 16;
     private Dictionary<string, LocalInfo> _locals = null!;
 
     public void Compile(List<IrInstruction> instructions)
     {
+        data.DebugData.Add(data.Assembler.Instructions.Count, 0, $"{functionData}");
         DefineLocalLabels();
         EmitFunctionDeclaration();
         foreach (var t in instructions)
@@ -142,9 +140,47 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
                 data.Assembler.cmp(r14, 0);
                 data.Assembler.je(data.Labels[instruction.Get<string>()].LabelByRef);
                 break;
+            case IrType.CallSharpFunction:
+                var funcToCall = data.Image.DllsManager.GetPointerOf(instruction.Get<string>());
+                Call(
+                    funcToCall.parameters.Length,
+                    funcToCall.returnType.SharpTypeToAsmValueType(),
+                    () => DirectCall((ulong)funcToCall.ptr)
+                );
+                break;
+            case IrType.CallFunction:
+                var irFunction =
+                    data.Image.Functions.Find(x => x.Name == instruction.Get<string>())
+                    ?? throw new InvalidOperationException();
+
+                Call(
+                    irFunction.Parameters.Count,
+                    irFunction.ReturnType,
+                    () => data.Assembler.call(data.Labels[irFunction.Name].LabelByRef)
+                );
+                break;
             default:
                 throw new ArgumentOutOfRangeException(instruction.ToString());
         }
+    }
+
+    private void Call(int paramsCount, AsmValueType returnType, Action call)
+    {
+        LoadArgumentsToRegisters(paramsCount);
+
+        var needToPushPopStub = data.StackManager.Sp % 16 != 0;
+        if (needToPushPopStub) data.StackManager.PushStub();
+
+        call();
+
+        if (needToPushPopStub) data.StackManager.PopStub();
+
+        if (returnType == AsmValueType.I64)
+            data.StackManager.Push(rax);
+        else if (returnType == AsmValueType.F64)
+            data.StackManager.Push(xmm0);
+        else if (returnType != AsmValueType.None)
+            throw new InvalidOperationException("Invalid return type");
     }
 
     private void EmitTypeInstruction(IrInstruction instruction, Action i64, Action f64)
@@ -243,36 +279,6 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         });
     }
 
-    private void EmitIdentifier(AstNode node)
-    {
-        var localInfo = _locals[node.Lexeme.Text];
-        if (node.Parent?.Lexeme.LexemeType == LexemeType.Set)
-        {
-            // load variable reference
-            data.Assembler.mov(r14, rbp);
-            data.Assembler.sub(r14, localInfo.Offset);
-            data.StackManager.Push(r14);
-        }
-        else
-        {
-            // push the value of variable
-            if (localInfo.Type == AsmValueType.Int64)
-            {
-                data.Assembler.mov(r14, __[rbp - localInfo.Offset]);
-                data.StackManager.Push(r14);
-            }
-            else if (localInfo.Type == AsmValueType.Float64)
-            {
-                data.Assembler.movq(xmm0, __[rbp - localInfo.Offset]);
-                data.StackManager.Push(xmm0);
-            }
-            else
-            {
-                throw new InvalidOperationException();
-            }
-        }
-    }
-
     private void EmitSet(IrInstruction instruction)
     {
         StackOperate(() =>
@@ -307,66 +313,11 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             data.Assembler.lea(r14, __[rbp - local.Offset]);
         else if (data.Labels.TryGetValue(referenceIdentifier, out var labelRef))
             data.Assembler.lea(r14, __[labelRef.LabelByRef]);
-        else if (data.DllsManager.HasFunction(referenceIdentifier))
-            data.Assembler.mov(r14, data.DllsManager.GetPointerOf(referenceIdentifier).ptr);
+        else if (data.Image.DllsManager.HaveFunction(referenceIdentifier))
+            data.Assembler.mov(r14, data.Image.DllsManager.GetPointerOf(referenceIdentifier).ptr);
         else throw new InvalidOperationException();
 
         data.StackManager.Push(r14);
-    }
-
-    private void EmitFunctionCall(AstNode node)
-    {
-        // var funcName = node.Lexeme.Text;
-        //
-        // if (data.Labels.TryGetValue(funcName, out var funcLabel))
-        // {
-        //     var startSp = data.StackManager.Sp;
-        //     var argsCount = node.Children[0].Children.Count;
-        //     var presumablyEndSp = startSp + argsCount * 8;
-        //     if (presumablyEndSp % 16 != 0) data.StackManager.PushStub();
-        //
-        //     var endSp = data.StackManager.Sp;
-        //     var deltaSp = endSp - startSp;
-        //
-        //     Debug.Assert(data.StackManager.Sp % 16 == 0);
-        //
-        //     data.Assembler.call(funcLabel.LabelByRef);
-        //
-        //     data.StackManager.Drop(deltaSp);
-        //
-        //     var meta = data.Image.Functions.First(x => x.Name == funcName);
-        //     if (meta.ReturnType == AsmValueType.Int64)
-        //         data.StackManager.Push(rax);
-        //     else if (meta.ReturnType == AsmValueType.Float64)
-        //         data.StackManager.Push(xmm0);
-        //     else throw new InvalidOperationException("Invalid return type");
-        // }
-        // else if (data.DllsManager.HasFunction(funcName))
-        // {
-        //     var funcToCall = data.DllsManager.GetPointerOf(funcName);
-        //
-        //     data.AstVisitor.Visit(node.Children[0], Emit, data.Helper.NeedToVisitChildren, true);
-        //
-        //     LoadArgumentsToRegisters(funcToCall);
-        //
-        //     var needToPushPopStub = data.StackManager.Sp % 16 != 0;
-        //     if (needToPushPopStub) data.StackManager.PushStub();
-        //
-        //     DirectCall((ulong)funcToCall.ptr);
-        //
-        //     if (needToPushPopStub) data.StackManager.PopStub();
-        //
-        //     if (funcToCall.returnType == typeof(long))
-        //         data.StackManager.Push(rax);
-        //     else if (funcToCall.returnType == typeof(double))
-        //         data.StackManager.Push(xmm0);
-        //     else if (funcToCall.returnType != typeof(void))
-        //         throw new InvalidOperationException("Invalid return type");
-        // }
-        // else
-        // {
-        //     throw new InvalidProgramException($"Has not found function with name {funcName}");
-        // }
     }
 
     private void StackOperate(Action i64Action, Action f64Action)
@@ -379,13 +330,14 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
 
     private void EmitParameters()
     {
-        var offset = 0;
+        var registers = OS.IsLinux()
+            ? CallConventions.SystemVAmd64Abi.ArgumentRegisters
+            : CallConventions.MicrosoftX64.ArgumentRegisters;
 
-        foreach (var parameter in functionData.Parameters)
+        for (var i = 0; i < functionData.Parameters.Count; i++)
         {
-            data.Assembler.mov(r14, __[rbp + PrologSizeInBytes + offset]);
-            data.Assembler.mov(__[rbp - _locals[parameter.name].Offset], r14);
-            offset += 8;
+            var parameter = functionData.Parameters[i];
+            data.Assembler.mov(__[rbp - _locals[parameter.name].Offset], registers[i].i64);
         }
     }
 
@@ -397,27 +349,25 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         if (OS.IsWindows()) data.Assembler.add(rsp, 32);
     }
 
-    private void LoadArgumentsToRegisters(InfoAboutMethod funcToCall)
+    private void LoadArgumentsToRegisters(int argsCount)
     {
         if (OS.IsLinux())
         {
             var registers = CallConventions.SystemVAmd64Abi.ArgumentRegisters;
 
-            for (var i = 0; i < funcToCall.parameters.Length; i++)
-                if (funcToCall.parameters.Length >= i + 1)
-                    if (data.StackManager.Peek() == AsmValueType.Int64)
-                        data.StackManager.Pop(registers[i].i64);
-                    else data.StackManager.Pop(registers[i].f64);
+            for (var i = 0; i < argsCount; i++)
+                if (data.StackManager.Peek() == AsmValueType.Int64)
+                    data.StackManager.Pop(registers[i].i64);
+                else data.StackManager.Pop(registers[i].f64);
         }
         else
         {
             var registers = CallConventions.MicrosoftX64.ArgumentRegisters;
 
-            for (var i = 0; i < funcToCall.parameters.Length; i++)
-                if (funcToCall.parameters.Length >= i + 1)
-                    if (data.StackManager.Peek() == AsmValueType.Int64)
-                        data.StackManager.Pop(registers[i].i64);
-                    else data.StackManager.Pop(registers[i].f64);
+            for (var i = 0; i < argsCount; i++)
+                if (data.StackManager.Peek() == AsmValueType.Int64)
+                    data.StackManager.Pop(registers[i].i64);
+                else data.StackManager.Pop(registers[i].f64);
         }
     }
 

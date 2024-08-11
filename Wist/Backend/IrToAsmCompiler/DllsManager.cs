@@ -7,9 +7,13 @@ using InfoAboutMethod = (nint ptr, ParameterInfo[] parameters, Type returnType);
 public class DllsManager
 {
     private readonly Dictionary<string, InfoAboutMethod> _functions = [];
+    private readonly List<string> _importsPaths = [];
+    public IReadOnlyList<string> ImportsPaths => _importsPaths;
 
     public void Import(string path)
     {
+        _importsPaths.Add(path);
+
         var functions = Assembly.LoadFrom(path)
             .GetTypes()
             .Where(x => x.Name.EndsWith("Library") || x.Name.EndsWith("Lib"))
@@ -35,7 +39,7 @@ public class DllsManager
         return _functions[functionName];
     }
 
-    public bool HasFunction(string funcName)
+    public bool HaveFunction(string funcName)
     {
         return _functions.ContainsKey(funcName);
     }

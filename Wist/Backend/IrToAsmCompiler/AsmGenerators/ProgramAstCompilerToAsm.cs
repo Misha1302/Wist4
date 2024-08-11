@@ -5,36 +5,35 @@ using Wist.Statistics.Logger;
 
 namespace Wist.Backend.IrToAsmCompiler.AsmGenerators;
 
-public class ProgramAstCompilerToAsm : IAstCompiler
+public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 {
-    private readonly AstCompilerData _data;
-    private readonly ILogger _logger;
-
-    public ProgramAstCompilerToAsm(ILogger logger)
-    {
-        _logger = logger;
-        var assembler = new Assembler(64);
-        _data = new AstCompilerData(
-            assembler, new DllsManager(), [], new CompilerHelper(),
-            new DebugData.DebugData(), new StackManager(assembler)
-        );
-    }
+    private AstCompilerData _data = null!;
 
     public IExecutable Compile(IrImage image)
     {
-        EmitImport(image.ImportPaths);
+        Init(image);
+
         EmitFunctions(image.Functions);
         EmitStartPoint();
         EmitFunctionCodes(image.Functions);
         return GetExecutable();
     }
 
+    private void Init(IrImage image)
+    {
+        var assembler = new Assembler(64);
+        _data = new AstCompilerData(
+            assembler, [], new CompilerHelper(),
+            new DebugData.DebugData(), new StackManager(assembler), image
+        );
+    }
+
     private IExecutable GetExecutable()
     {
         return OS.IsLinux()
-            ? new LinuxAsmExecutable(_data.Assembler, _data.DebugData, _logger)
+            ? new LinuxAsmExecutable(_data.Assembler, _data.DebugData, logger)
             : OS.IsWindows()
-                ? new WindowsAsmExecutable(_data.Assembler, _data.DebugData, _logger)
+                ? new WindowsAsmExecutable(_data.Assembler, _data.DebugData, logger)
                 : throw new InvalidOperationException("No supported executable for this OS");
     }
 
@@ -125,11 +124,5 @@ public class ProgramAstCompilerToAsm : IAstCompiler
     {
         foreach (var func in functions)
             _data.Labels.Add(func.Name, new LabelRef(_data.Assembler.CreateLabel(func.Name)));
-    }
-
-    private void EmitImport(List<string> paths)
-    {
-        foreach (var path in paths)
-            _data.DllsManager.Import(path);
     }
 }

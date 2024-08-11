@@ -6,13 +6,16 @@ main() -> i64 (
     i64 c = 777
     i64 d = 666
     i64 e = 555
-    i64 f = 444
-    i64 g = 333
-    i64 h = 222
+    i64 f = a + b
+    i64 g = f + b + a
+    i64 h = f + g + d + 7
     i64 k = 123
     
-    i64 q = 10 * (a + b + c + Str:StrToI64(Console:Read()) + c + d + e + f) / g * h % k * a / (3 * 2)
+    i64 X = Str:StrToI64(Console:Read())
+    i64 q = 10 * (a + b + c + X + c + d + e * f % g + h) / g * h % k * a / (3 * 2)
+    i64 w = 5 / 2 * X / 1 / 2 / 3
     Console:Write(Str:I64ToStr(q))
+    Console:Write(Str:I64ToStr(w))
 
     ret 0
 )

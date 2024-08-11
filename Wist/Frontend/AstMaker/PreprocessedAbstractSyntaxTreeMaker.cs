@@ -8,8 +8,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
 {
     private static readonly HashSet<LexemeType>[] _lexemeTypes =
     [
-        [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef],
-        [LexemeType.Type],
+        [Goto, For, Import, FunctionDeclaration, FunctionCall, GettingRef, LexemeType.Type],
         [Mul, Div, Modulo],
         [Plus, Minus],
         [Equal, NotEqual],
@@ -51,7 +50,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
         switch (handlingType)
         {
             case LexemeType.Type:
-                if (astNodes.Count <= 1 || astNodes[i + 1].Children.Count != 0) return i;
+                if (astNodes.Count <= 1 || i + 1 >= astNodes.Count || astNodes[i + 1].Children.Count != 0) return i;
                 astNodes[i + 1].AddAndRemove(astNodes, i);
                 return i;
             case Set:
@@ -132,6 +131,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
             case Arrow:
             case Comment:
             case Float64:
+            case Character:
             default:
                 throw new ArgumentOutOfRangeException();
         }

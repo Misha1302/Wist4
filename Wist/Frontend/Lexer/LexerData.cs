@@ -51,12 +51,15 @@ public static class LexerData
             new(Identifier, "[a-zA-Z_][a-zA-Z_0-9:]*(?!(:))"),
         };
 
+        const string whitespace = @"[ \t]";
+        const string spacesWithNl = @"\s";
+
         var integer = lds.Get(Int64).Pattern;
         var identifier = lds.Get(Identifier).Pattern;
         var arrow = lds.Get(Arrow).Pattern;
         var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
-        var first = @$"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=(\s+{identifier}))";
-        var second = @$"(?<=({arrow}\s*))(?!({keywords})){identifier}";
+        var first = $"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=({whitespace}+{identifier}))";
+        var second = $"(?<=({arrow}{whitespace}*))(?!({keywords})){identifier}";
         lds.Insert(0, new Ld(Type, $"({first})|({second})\\*?"));
 
         lds.Insert(0, new Ld(Int32, $"{integer}s"));
@@ -64,7 +67,9 @@ public static class LexerData
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
         lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
-        lds.Insert(0, new Ld(FunctionDeclaration, $@"{identifier}\s*(?=(\(\s*[a-zA-Z0-9\s,]*\)\s*\-\>))"));
+        lds.Insert(0,
+            new Ld(FunctionDeclaration,
+                $@"{identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
 
 
         lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9]))"));

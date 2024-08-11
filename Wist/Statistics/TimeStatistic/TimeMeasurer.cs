@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Wist.Logger;
+using Wist.Statistics.Logger;
 
 namespace Wist.Statistics.TimeStatistic;
 

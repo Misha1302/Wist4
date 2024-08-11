@@ -11,6 +11,11 @@ public static class MemoryOperationsLib
         return Unsafe.Read<long>((void*)address);
     }
 
+    public static unsafe long ReadMemI16(long address)
+    {
+        return Unsafe.Read<short>((void*)address);
+    }
+
     public static unsafe void WriteMemI64(long address, long value)
     {
         Unsafe.Write((void*)address, value);

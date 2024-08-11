@@ -1,11 +1,12 @@
-﻿using Wist.Backend.Compiler.AsmGenerators;
+﻿using Wist.Backend.AstToIrCompiler;
 using Wist.Backend.Executing;
+using Wist.Backend.IrToAsmCompiler.AsmGenerators;
 using Wist.Frontend;
 using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer;
 using Wist.Frontend.Lexer.Lexemes;
-using Wist.Logger;
 using Wist.MiddleEnd;
+using Wist.Statistics.Logger;
 using Wist.Statistics.TimeStatistic;
 
 namespace Wist.Main;
@@ -15,10 +16,11 @@ public static class Program
     private static ILogger _logger = null!;
     private static string _source = null!;
     private static List<Lexeme> _lexemes = null!;
-    private static AstNode _astRoot = null!;
+    private static AstNode _unoptimizedAstRoot = null!;
     private static AstNode _optimizedRoot = null!;
     private static IExecutable _executable = null!;
     private static TimeMeasurer _measurer = null!;
+    private static IrImage _ir = null!;
 
     public static void Main()
     {
@@ -34,9 +36,16 @@ public static class Program
         _measurer.Measure(ExecuteLexer);
         _measurer.Measure(ExecuteAstMaker);
         _measurer.Measure(ExecuteAstOptimizer);
+        _measurer.Measure(ExecuteIrCompiler);
         _measurer.Measure(ExecuteAstCompiler);
         _measurer.Measure(ExecuteProgramSaver);
         _measurer.Measure(ExecuteExecutable);
+    }
+
+    private static void ExecuteIrCompiler()
+    {
+        var irCompiler = new AstToIrCompiler(_logger);
+        _ir = irCompiler.Compile(_optimizedRoot);
     }
 
     private static void ExecuteExecutable()
@@ -53,19 +62,19 @@ public static class Program
     private static void ExecuteAstCompiler()
     {
         var compiler = new ProgramAstCompilerToAsm(_logger);
-        _executable = compiler.Compile(_optimizedRoot);
+        _executable = compiler.Compile(_ir);
     }
 
     private static void ExecuteAstOptimizer()
     {
-        var astOptimizer = new BasicAstOptimizer(_logger);
-        _optimizedRoot = astOptimizer.OptimizeAst(_astRoot);
+        var astOptimizer = new AstOptimizerStub();
+        _optimizedRoot = astOptimizer.OptimizeAst(_unoptimizedAstRoot);
     }
 
     private static void ExecuteAstMaker()
     {
         var astMaker = new AbstractSyntaxTreeMaker(_lexemes, _logger);
-        _astRoot = astMaker.GetAstRoot();
+        _unoptimizedAstRoot = astMaker.GetAstRoot();
     }
 
     private static void ExecuteLexer()

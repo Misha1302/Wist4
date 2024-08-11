@@ -1,23 +1,17 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    i64 a = 999
-    i64 b = 888
-    i64 c = 777
-    i64 d = 666
-    i64 e = 555
-    i64 f = a + b
-    i64 g = f + b + a
-    i64 h = f + g + d + 7
-    i64 k = 123
+    i64 i = 0
     
-    i64 X = Str:StrToI64(Console:Read())
-    i64 q = 10 * (a + b + c + X + c + d + e * f % g + h) / g * h % k * a / (3 * 2)
-    i64 w = 5 / 2 * X / 1 / 2 / 3
-    Console:Write(Str:I64ToStr(q))
-    Console:Write(Str:I64ToStr(w))
+    
+while_start:
+    
+    if (i >= 5) ( goto while_end )
+    
+    i = i + 1
 
-    ret 0
+    goto while_start
+while_end:
+
+    ret i
 )
-
-f(i64 a) -> i64 ( ret a )

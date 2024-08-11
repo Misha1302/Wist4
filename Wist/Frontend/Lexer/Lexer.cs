@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Wist.Frontend.Lexer.Lexemes;
-using Wist.Logger;
+using Wist.Statistics.Logger;
 
 namespace Wist.Frontend.Lexer;
 

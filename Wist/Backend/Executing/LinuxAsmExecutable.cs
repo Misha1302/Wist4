@@ -1,8 +1,8 @@
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using Iced.Intel;
-using Wist.Backend.Compiler.DebugData;
-using Wist.Logger;
+using Wist.Backend.IrToAsmCompiler.DebugData;
+using Wist.Statistics.Logger;
 
 namespace Wist.Backend.Executing;
 

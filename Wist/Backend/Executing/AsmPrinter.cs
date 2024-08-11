@@ -1,5 +1,5 @@
 using Iced.Intel;
-using Wist.Backend.Compiler.DebugData;
+using Wist.Backend.IrToAsmCompiler.DebugData;
 
 namespace Wist.Backend.Executing;
 
@@ -23,14 +23,14 @@ public static class AsmPrinter
             if (debugData.TryGet(i, out var list))
                 foreach (var item in list)
                 {
-                    WriteDepthLevel(".#", item.depthLevel, so, " ");
+                    WriteDepthLevel(".#", item.depthLevel + 2, so, " ");
                     so.Write(item.message + "\n", FormatterTextKind.Text);
 
                     depthLevel = item.depthLevel;
                 }
 
             var instruction = asm.Instructions[i];
-            WriteDepthLevel("- ", depthLevel, so);
+            WriteDepthLevel("  ", depthLevel, so);
             formatter.Format(instruction, so);
             so.Write("\n", FormatterTextKind.Text);
         }

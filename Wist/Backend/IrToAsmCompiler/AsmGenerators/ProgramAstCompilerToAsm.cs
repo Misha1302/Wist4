@@ -15,8 +15,21 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 
         EmitFunctions(image.Functions);
         EmitStartPoint();
+        EmitStaticData(image.StaticData);
         EmitFunctionCodes(image.Functions);
         return GetExecutable();
+    }
+
+    private void EmitStaticData(Dictionary<string, byte[]> staticData)
+    {
+        foreach (var pair in staticData)
+        {
+            var labelRef = new LabelRef(_data.Assembler.CreateLabel(pair.Key));
+            _data.Labels.Add(pair.Key, labelRef);
+
+            _data.Assembler.Label(ref labelRef.LabelByRef);
+            _data.Assembler.db(pair.Value);
+        }
     }
 
     private void Init(IrImage image)

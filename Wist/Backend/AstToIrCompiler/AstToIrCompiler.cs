@@ -13,7 +13,7 @@ namespace Wist.Backend.AstToIrCompiler;
 public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 {
     private readonly CompilerHelper _helper = new();
-    private readonly IrImage _image = new([], new DllsManager());
+    private readonly IrImage _image = new([], new DllsManager(), new Dictionary<string, byte[]>());
     private readonly ImprovedStack<AsmValueType> _stack = new();
     private readonly AstVisitor _visitor = new();
 
@@ -101,7 +101,8 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 _stack.Push(I64);
                 break;
             case Character:
-                Instructions.Add(new IrInstruction(IrType.Push, I64, (long)text[0]));
+                // 1, 'cause first and last symbols are '
+                Instructions.Add(new IrInstruction(IrType.Push, I64, (long)text[1]));
                 _stack.Push(I64);
                 break;
             case LexemeType.Float64:
@@ -178,12 +179,21 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                     : _image.Functions.First(x => x.Name == text).ReturnType
                 );
                 break;
+            case LexemeType.String:
+                var stringPointerName = $"string_{text}_{Guid.NewGuid()}";
+                var len = BitConverter.GetBytes((long)text.Length - 2);
+                var str = text[1..^1].ToCharArray().SelectMany(BitConverter.GetBytes).ToArray();
+                _image.StaticData.Add(stringPointerName, len.Concat(str).ToArray());
+                Instructions.Add(new IrInstruction(IrType.GetReference, Invalid, stringPointerName));
+                Instructions.Add(new IrInstruction(IrType.Push, I64, 8L));
+                Instructions.Add(new IrInstruction(IrType.Add, I64));
+                _stack.Push(I64);
+                break;
             case Scope:
             case Arrow:
             case Comment:
             case LexemeType.Type:
                 break;
-            case LexemeType.String:
             case As:
             case Alias:
             case Is:

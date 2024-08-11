@@ -1,14 +1,7 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    i64 q = 0
-    Mem:WriteMemI64(&q, 10)
-    Console:Write(Str:I64ToStr(fact(Mem:ReadMemI64(&q))))
-    ret 0
-)
-
-
-fact(i64 x) -> i64 (
-    if (x <= 2) ( ret x )
-    ret x * fact(x - 1)
+    i64 ptr = "Hi!"
+    Mem:WriteMemI16(ptr + 2, 'a')
+    Console:Write(ptr)
 )

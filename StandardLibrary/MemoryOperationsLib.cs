@@ -20,4 +20,9 @@ public static class MemoryOperationsLib
     {
         Unsafe.Write((void*)address, value);
     }
+
+    public static unsafe void WriteMemI16(long address, long value)
+    {
+        Unsafe.Write((void*)address, (short)value);
+    }
 }

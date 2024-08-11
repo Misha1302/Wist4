@@ -72,7 +72,7 @@ public static class LexerData
                 $@"{identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
 
 
-        lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9]))"));
+        lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9:]))"));
 
         return lds;
     }

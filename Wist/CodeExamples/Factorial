@@ -1,9 +1,9 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 main() -> i64 (
-    Console:Write(Str:I64ToStr(fact(5)))
-    Console:Write(Str:I64ToStr(fact(7)))
-    Console:Write(Str:I64ToStr(fact(10)))
+    Console::Write(Str::I64ToStr(fact(5)))
+    Console::Write(Str::I64ToStr(fact(7)))
+    Console::Write(Str::I64ToStr(fact(10)))
     ret 0
 )
 

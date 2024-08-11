@@ -2,7 +2,7 @@ namespace StandardLibrary;
 
 public static class StdConsoleLib
 {
-    public static readonly string Prefix = "Console:";
+    public static readonly string Prefix = "Console::";
 
     public static void WriteNoLn(long strPtr)
     {

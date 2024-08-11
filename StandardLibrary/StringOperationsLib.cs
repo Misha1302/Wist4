@@ -6,7 +6,7 @@ namespace StandardLibrary;
 
 public static class StringOperationsLib
 {
-    public static readonly string Prefix = "Str:";
+    public static readonly string Prefix = "Str::";
 
     private static readonly StringBuilder _sb = new(16);
 

@@ -4,7 +4,7 @@ namespace StandardLibrary;
 
 public static class MemoryOperationsLib
 {
-    public static readonly string Prefix = "Mem:";
+    public static readonly string Prefix = "Mem::";
 
     public static unsafe long ReadMemI64(long address)
     {

@@ -6,7 +6,7 @@ public static class BasicAllocatorLib
 {
     // to save length of array we need to alloc place for it
     private const int LengthItemSizeInBytes = 8;
-    public static readonly string Prefix = "Allocator:";
+    public static readonly string Prefix = "Allocator::";
 
     public static long Calloc(long bytes)
     {

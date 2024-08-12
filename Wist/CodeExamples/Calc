@@ -12,19 +12,26 @@ import "../../../Libraries/net8.0/StandardLibrary.dll"
     c; \
     goto LABEL(start); \
     LABEL(end):;
+
+#define while(a, b) \
+    LABEL(start):; \
+    if (!(a)) ( goto LABEL(end) ); \
+    b; \
+    goto LABEL(start); \
+    LABEL(end):;
     
 
 main() -> i64 (
     for (i64 i = 0, i <= 2, i = i + 1, 
         Console::Write(Str::I64ToStr(i))
     )
-
     Console::Write("")
 
-    for (i64 i = 3, i <= 5, i = i + 1, 
-        Console::Write(Str::I64ToStr(i))
+    i64 i = 3
+    while (i <= 5, 
+        Console::Write(Str::I64ToStr(i)); 
+        i = i + 1
     )
-
     Console::Write("")
 
     ret 0

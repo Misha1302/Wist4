@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Principal;
 using Wist.Backend;
 using Wist.Statistics.Logger;
 
@@ -20,8 +21,19 @@ public class GccPreprocessor(ILogger logger) : IPreprocessor
 
         if (OS.IsWindows())
         {
+#pragma warning disable CA1416 // Проверка совместимости платформы
+            var userName = WindowsIdentity.GetCurrent().Name.Split(@"\")[1];
+#pragma warning restore CA1416 // Проверка совместимости платформы
+
+            var pathToGcc = $"""C:\Users\{userName}\gcc\bin\gcc.exe""";
+            if (!File.Exists(pathToGcc))
+            {
+                throw new InvalidOperationException("Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
+            }
+
+
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/c \"gcc -nostdinc -x c -E {sourceFile} > {outputFile}\"";
+            process.StartInfo.Arguments = $"/c \"\"{pathToGcc}\" -nostdinc -x c -E {sourceFile} > {outputFile}\"";
         }
         else if (OS.IsLinux())
         {

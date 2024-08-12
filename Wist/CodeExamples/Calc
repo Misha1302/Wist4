@@ -1,15 +1,18 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
+#define qw 777
+
 main() -> i64 (
+    ret qw
     i64 i = 0
-    
+
 while_start:
     if (i >= 5) ( ret 0 )
 
     i64 ptr = "Hi!"
     Mem::WriteMemI16(ptr + 2, 'a')
     Console::Write(ptr)
-    
+
     i = i + 1
     goto while_start
 )

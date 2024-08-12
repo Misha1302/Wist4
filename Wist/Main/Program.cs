@@ -6,6 +6,7 @@ using Wist.Frontend.AstMaker;
 using Wist.Frontend.Lexer;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.MiddleEnd;
+using Wist.Preprocessor;
 using Wist.Statistics.Logger;
 using Wist.Statistics.TimeStatistic;
 
@@ -21,6 +22,7 @@ public static class Program
     private static IExecutable _executable = null!;
     private static TimeMeasurer _measurer = null!;
     private static IrImage _ir = null!;
+    private static string _preprocessed = null!;
 
     public static void Main()
     {
@@ -33,6 +35,7 @@ public static class Program
         _measurer = new TimeMeasurer(_logger);
 
         _measurer.Measure(ExecuteSourceCodeReader);
+        _measurer.Measure(ExecutePreprocessor);
         _measurer.Measure(ExecuteLexer);
         _measurer.Measure(ExecuteAstMaker);
         _measurer.Measure(ExecuteAstOptimizer);
@@ -40,6 +43,12 @@ public static class Program
         _measurer.Measure(ExecuteAstCompiler);
         _measurer.Measure(ExecuteProgramSaver);
         _measurer.Measure(ExecuteExecutable);
+    }
+
+    private static void ExecutePreprocessor()
+    {
+        var preprocessor = new GccPreprocessor(_logger);
+        _preprocessed = preprocessor.Preprocess(_source);
     }
 
     private static void ExecuteIrCompiler()
@@ -79,7 +88,7 @@ public static class Program
 
     private static void ExecuteLexer()
     {
-        var lexer = new Lexer(_source, _logger);
+        var lexer = new Lexer(_preprocessed, _logger);
         _lexemes = lexer.Lexeme();
     }
 

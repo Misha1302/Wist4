@@ -7,54 +7,108 @@ namespace Wist.Preprocessor;
 
 public class GccPreprocessor(ILogger logger) : IPreprocessor
 {
+    private const string SourceFile = "temp_source.c";
+    private const string OutputFile = "temp_output.c";
+
     public string Preprocess(string input)
     {
-        const string sourceFile = "temp_source.c";
-        const string outputFile = "temp_output.c";
+        input = StdPreprocess(input);
+        input = AddExtraSemicolonsToSaveStringsAfterMacroses(input);
 
-        File.WriteAllText(sourceFile, input);
-        File.WriteAllText(outputFile, "");
+        PrepareDataForGccPreprocessor(input);
 
+        RunPreprocessor();
 
-        var process = new Process();
-        process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+        var result = ReadPreprocessorResult();
 
-        if (OS.IsWindows())
-        {
-#pragma warning disable CA1416 // Проверка совместимости платформы
-            var userName = WindowsIdentity.GetCurrent().Name.Split(@"\")[1];
-#pragma warning restore CA1416 // Проверка совместимости платформы
+        LogAndClear(result);
 
-            var pathToGcc = $"""C:\Users\{userName}\gcc\bin\gcc.exe""";
-            if (!File.Exists(pathToGcc))
-                throw new InvalidOperationException(
-                    "Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
+        return result;
+    }
 
+    private void LogAndClear(string result)
+    {
+        logger.Log(result);
 
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/c \"\"{pathToGcc}\" -nostdinc -x c -E {sourceFile} > {outputFile}\"";
-        }
-        else if (OS.IsLinux())
-        {
-            process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"gcc -nostdinc -x c -E {sourceFile} > {outputFile}\"";
-        }
-        else
-        {
-            throw new InvalidOperationException("Unsupported OS for preprocessor");
-        }
+        File.Delete(SourceFile);
+        File.Delete(OutputFile);
+    }
 
+    private static string ReadPreprocessorResult()
+    {
+        var result = string.Join("\n", File.ReadAllLines(OutputFile).Where(x => x.Length == 0 || x[0] != '#'));
+        return result;
+    }
 
+    private static void RunPreprocessor()
+    {
+        var process = MakeGccPreprocessorProcess();
         process.Start();
         process.WaitForExit();
 
-        var result = string.Join("\n", File.ReadAllLines(outputFile).Where(x => x.Length == 0 || x[0] != '#'));
+        if (string.IsNullOrEmpty(File.ReadAllText(OutputFile)))
+            throw new InvalidOperationException("GCC preprocessor failed");
+    }
 
-        logger.Log(result);
+    private static Process MakeGccPreprocessorProcess()
+    {
+        var process = new Process();
+        process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
 
-        File.Delete(sourceFile);
-        File.Delete(outputFile);
+        if (OS.IsWindows()) SetGccPreprocessorStartInfoForWindows(process);
+        else if (OS.IsLinux()) SetGccPreprocessorStartInfoForLinux(process);
+        else throw new InvalidOperationException("Unsupported OS for preprocessor");
 
-        return result;
+        return process;
+    }
+
+    private static void SetGccPreprocessorStartInfoForLinux(Process process)
+    {
+        process.StartInfo.FileName = "/bin/bash";
+        process.StartInfo.Arguments = $"-c \"gcc -nostdinc -x c -E {SourceFile} > {OutputFile}\"";
+    }
+
+    private static void SetGccPreprocessorStartInfoForWindows(Process process)
+    {
+#pragma warning disable CA1416 // Проверка совместимости платформы
+        var userName = WindowsIdentity.GetCurrent().Name.Split(@"\")[1];
+#pragma warning restore CA1416 // Проверка совместимости платформы
+
+        var pathToGcc = $"""C:\Users\{userName}\gcc\bin\gcc.exe""";
+        if (!File.Exists(pathToGcc))
+            throw new InvalidOperationException(
+                "Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
+
+
+        process.StartInfo.FileName = "cmd.exe";
+        process.StartInfo.Arguments = $"/c \"\"{pathToGcc}\" -nostdinc -x c -E {SourceFile} > {OutputFile}\"";
+    }
+
+    private static void PrepareDataForGccPreprocessor(string input)
+    {
+        File.WriteAllText(SourceFile, input);
+        File.WriteAllText(OutputFile, "");
+    }
+
+    private static string AddExtraSemicolonsToSaveStringsAfterMacroses(string input)
+    {
+        var arr = input.Split('\n');
+        for (var i = 0; i < arr.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(arr[i])) continue;
+            if (arr[i][0] == '#') continue;
+            if (arr[i].TrimEnd()[^1] == '\\') continue;
+
+            arr[i] += ";";
+        }
+
+        input = string.Join("\n", arr);
+        return input;
+    }
+
+    private static string StdPreprocess(string input)
+    {
+        input = new StdImportsPreprocessor().Preprocess(input, []);
+        return input;
     }
 }

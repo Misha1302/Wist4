@@ -1,0 +1,19 @@
+import "../../../Libraries/net8.0/StandardLibrary.dll"
+import "CodeExamples/StdLib"
+    
+
+main() -> i64 (
+    for (i64 i = 0, i <= 2, i = i + 1, 
+        printI64(i)
+    )
+    printStr("")
+
+    i64 i = 3
+    while (i <= 5, 
+        printI64(i)
+        i = i + 1
+    )
+    printStr("")
+
+    ret 0
+)

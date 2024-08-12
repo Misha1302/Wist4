@@ -12,6 +12,7 @@ public class DllsManager
 
     public void Import(string path)
     {
+        if (_importsPaths.Contains(path)) return;
         _importsPaths.Add(path);
 
         var functions = Assembly.LoadFrom(path)

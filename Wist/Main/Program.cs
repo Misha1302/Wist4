@@ -95,6 +95,6 @@ public static class Program
     private static void ExecuteSourceCodeReader()
     {
         var sourceCodeReader = new SourceCodeReader(_logger);
-        _source = sourceCodeReader.Read("CodeExamples/Calc");
+        _source = sourceCodeReader.Read("CodeExamples/Main");
     }
 }

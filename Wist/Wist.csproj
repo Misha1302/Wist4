@@ -17,7 +17,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="CodeExamples\Calc">
+        <None Update="CodeExamples\Main">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="CodeExamples\StdLib\BaseFunctions">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="CodeExamples\StdLib\StdMacroses">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

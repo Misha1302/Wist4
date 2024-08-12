@@ -1,5 +1,3 @@
-import "../../../Libraries/net8.0/StandardLibrary.dll"
-
 #define _CONCAT(a, n) a##n
 #define _LABEL(a, n) _CONCAT(_##a, n)
 #define LABEL(a) _LABEL(a, __LINE__)
@@ -19,20 +17,3 @@ import "../../../Libraries/net8.0/StandardLibrary.dll"
     b; \
     goto LABEL(start); \
     LABEL(end):;
-    
-
-main() -> i64 (
-    for (i64 i = 0, i <= 2, i = i + 1, 
-        Console::Write(Str::I64ToStr(i))
-    )
-    Console::Write("")
-
-    i64 i = 3
-    while (i <= 5, 
-        Console::Write(Str::I64ToStr(i)); 
-        i = i + 1
-    )
-    Console::Write("")
-
-    ret 0
-)

@@ -1,0 +1,6 @@
+import "../../../Libraries/net8.0/StandardLibrary.dll"
+
+printStr(i64 stringPtr) -> none ( Console::Write(stringPtr); ret 0 )
+printI64(i64 value) -> none ( printStr(Str::I64ToStr(value)); ret 0 )
+inputStr() -> i64 ( ret Console::Read() )
+inputI64(i64 value) -> none ( ret Str::StrToI64(inputStr()) )

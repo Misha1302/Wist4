@@ -19,10 +19,12 @@ public class Lexer(string source, ILogger logger)
             .OrderBy(x => x.match.Index)
             .ToList();
 
+
         var startIndex = 0;
         while (pos < source.Length)
         {
             startIndex = regex.FindIndex(startIndex, x => x.match.Index == pos);
+            if (startIndex < 0) throw new InvalidDataException(GetErrorMessage(source, pos));
             var match = regex[startIndex];
 
             if (match == default) throw new InvalidDataException();
@@ -34,5 +36,14 @@ public class Lexer(string source, ILogger logger)
         lexemes.RemoveAll(x => x.LexemeType is LexemeType.Spaces or LexemeType.NewLine or LexemeType.Comment);
         logger.Log(string.Join("\n", lexemes));
         return lexemes;
+    }
+
+    private string GetErrorMessage(string s, int pos)
+    {
+        var left = Math.Clamp(pos - 10, 0, s.Length);
+        var right = Math.Clamp(pos + 11, 0, s.Length);
+        var message = s[left..right];
+        var bottom = string.Join("", message.Select((x, i) => i == 10 ? "|" : "~"));
+        return "\n" + message + "\n" + bottom;
     }
 }

@@ -21,14 +21,15 @@ public class GccPreprocessor(ILogger logger) : IPreprocessor
 
         if (OS.IsWindows())
         {
-#pragma warning disable CA1416 // Проверка совместимости платформы
+#pragma warning disable CA1416 // РџСЂРѕРІРµСЂРєР° СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё РїР»Р°С‚С„РѕСЂРјС‹
             var userName = WindowsIdentity.GetCurrent().Name.Split(@"\")[1];
-#pragma warning restore CA1416 // Проверка совместимости платформы
+#pragma warning restore CA1416 // РџСЂРѕРІРµСЂРєР° СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё РїР»Р°С‚С„РѕСЂРјС‹
 
             var pathToGcc = $"""C:\Users\{userName}\gcc\bin\gcc.exe""";
             if (!File.Exists(pathToGcc))
             {
-                throw new InvalidOperationException("Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
+                throw new InvalidOperationException(
+                    "Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
             }
 
 

@@ -19,6 +19,6 @@ public class CompilerHelper
         var localsInfo = locals.Select((x, i) => (x.name, new LocalInfo(x.name, (i + 1) * 8, x.type)));
         var localsCount = locals.Count + 1;
         var allocationBytes = (localsCount + localsCount % 2) * 8;
-        return (localsInfo.ToDictionary(), allocationBytes);
+        return (localsInfo.DistinctBy(x => x.name).ToDictionary(), allocationBytes);
     }
 }

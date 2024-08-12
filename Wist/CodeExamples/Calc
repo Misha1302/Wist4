@@ -1,18 +1,31 @@
 import "../../../Libraries/net8.0/StandardLibrary.dll"
 
-#define qw 777
+#define _CONCAT(a, n) a##n
+#define _LABEL(a, n) _CONCAT(_##a, n)
+#define LABEL(a) _LABEL(a, __LINE__)
+
+#define for(a, b, c, d) \
+    a; \
+    LABEL(start):; \
+    if (!(b)) ( goto LABEL(end) ); \
+    d; \
+    c; \
+    goto LABEL(start); \
+    LABEL(end):;
+    
 
 main() -> i64 (
-    ret qw
-    i64 i = 0
+    for (i64 i = 0, i <= 2, i = i + 1, 
+        Console::Write(Str::I64ToStr(i))
+    )
 
-while_start:
-    if (i >= 5) ( ret 0 )
+    Console::Write("")
 
-    i64 ptr = "Hi!"
-    Mem::WriteMemI16(ptr + 2, 'a')
-    Console::Write(ptr)
+    for (i64 i = 3, i <= 5, i = i + 1, 
+        Console::Write(Str::I64ToStr(i))
+    )
 
-    i = i + 1
-    goto while_start
+    Console::Write("")
+
+    ret 0
 )

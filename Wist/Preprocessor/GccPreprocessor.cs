@@ -27,10 +27,8 @@ public class GccPreprocessor(ILogger logger) : IPreprocessor
 
             var pathToGcc = $"""C:\Users\{userName}\gcc\bin\gcc.exe""";
             if (!File.Exists(pathToGcc))
-            {
                 throw new InvalidOperationException(
                     "Maybe gcc was not installed. You can follow this guide to download gcc the easiest way: https://programforyou.ru/poleznoe/kak-ustanovit-gcc-dlya-windows");
-            }
 
 
             process.StartInfo.FileName = "cmd.exe";

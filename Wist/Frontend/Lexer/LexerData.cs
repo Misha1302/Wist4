@@ -12,6 +12,7 @@ public static class LexerData
         var lds = new List<Ld>
         {
             new(Comment, @"//[^\r\n]*"),
+            new(NewLine, ";"),
             new(Arrow, "->"),
             new(LeftPar, "\\("),
             new(RightPar, "\\)"),
@@ -26,7 +27,7 @@ public static class LexerData
             new(Equal, "=="),
             new(Character, "\'.\'"),
             new(Import, "import"),
-            new(String, "\"[^\"]+\""),
+            new(String, "\"[^\"]*?\""),
             new(As, "as"),
             new(Alias, "alias"),
             new(Is, "is"),

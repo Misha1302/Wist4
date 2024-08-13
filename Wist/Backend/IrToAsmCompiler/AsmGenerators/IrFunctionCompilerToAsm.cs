@@ -298,6 +298,8 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
     {
         if (data.Labels[functionData.Name].LabelByRef.InstructionIndex >= 0) return;
 
+        CheckFunctionHaveReturn();
+
         data.Assembler.Label(ref data.Labels[functionData.Name].LabelByRef);
 
         EmitEnter();
@@ -306,6 +308,12 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         data.Assembler.vzeroupper();
 
         EmitParameters();
+    }
+
+    private void CheckFunctionHaveReturn()
+    {
+        if (functionData.Instructions.All(x => x.Instruction != IrType.Ret))
+            throw new InvalidOperationException($"Function {functionData.Name} have not return");
     }
 
     private void EmitGetRef(string identifier)

@@ -4,7 +4,7 @@ namespace Wist.Backend.AstToIrCompiler;
 
 public record IrFunction(
     string Name,
-    List<(string name, AsmValueType type)> Locals,
+    List<IIrLocalInfo> Locals,
     List<(string name, AsmValueType type)> Parameters,
     List<IrInstruction> Instructions,
     AsmValueType ReturnType)

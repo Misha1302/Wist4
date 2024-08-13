@@ -3,15 +3,23 @@ import "CodeExamples/StdLib"
     
 
 main() -> i64 (
-    for (i64 i = 0, i <= 5, i = i + 1,
-        printI64NoLn(i)
-        printStrNoLn(" ")
-        if (i <= 0) ( printStr("Zero") )
-        elif (i <= 1) ( printStr("One") )
-        elif (i <= 2) ( printStr("Two") )
-        elif (i <= 3) ( printStr("Three") )
-        else ( printStr("Unknown") )
-    )
+    Vector3 vec = null
+    Vector3:new(3, 4, 5, &vec)
+
+    printI64(vec:x)
+    printI64(vec:y)
+    printI64(vec:z)
 
     ret 0
 )
+
+Vector3:new(i64 x, i64 y, i64 z, i64 structPtr) -> none (
+    Mem::WriteMemI64(structPtr, x)
+    Mem::WriteMemI64(structPtr + 8, y)
+    Mem::WriteMemI64(structPtr + 16, z)
+    
+    ret 0
+)
+
+
+struct Vector3(i64 x, i64 y, i64 z)

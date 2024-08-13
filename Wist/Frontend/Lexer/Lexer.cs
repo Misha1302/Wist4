@@ -17,6 +17,7 @@ public class Lexer(string source, ILogger logger)
             .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
             .Where(x => x.match.Success)
             .OrderBy(x => x.match.Index)
+            .ThenBy(x => _lexemeDeclarations.IndexOf(x.decl))
             .ToList();
 
 

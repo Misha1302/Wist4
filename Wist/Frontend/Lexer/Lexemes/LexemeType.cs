@@ -48,6 +48,7 @@ public enum LexemeType
     Modulo,
     Float64,
     Character,
+    StructDeclaration,
 
 
     Scope,

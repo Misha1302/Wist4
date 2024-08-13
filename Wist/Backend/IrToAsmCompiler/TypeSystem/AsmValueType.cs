@@ -2,7 +2,6 @@ namespace Wist.Backend.IrToAsmCompiler.TypeSystem;
 
 public enum AsmValueType
 {
-    // ReSharper disable once UnusedMember.Global
     Invalid,
     None,
     Int64,

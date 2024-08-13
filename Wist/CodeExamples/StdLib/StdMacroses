@@ -2,6 +2,9 @@
 #define _LABEL(a, n) _CONCAT(_##a, n)
 #define LABEL(a) _LABEL(a, __LINE__)
 
+#define null 0
+#define default 0
+
 #define for(a, b, c, d) \
     a; \
     LABEL(start):; \

@@ -66,12 +66,14 @@ public static class LexerData
         lds.Insert(0, new Ld(Int32, $"{integer}s"));
         lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
         lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
-        lds.Insert(0, new Ld(FunctionCall, $"{identifier}(?=({lds.Get(LeftPar).Pattern}))"));
+        lds.Insert(0,
+            new Ld(FunctionCall,
+                $"(?<!(struct[ \\t]*)){identifier}(?=({lds.Get(LeftPar).Pattern}))(?!(.+\\s*\\-\\>))"));
         lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
+        lds.Insert(0, new Ld(StructDeclaration, $"struct(?!({identifier}))"));
         lds.Insert(0,
             new Ld(FunctionDeclaration,
-                $@"{identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
-
+                $@"(?=({whitespace}*))(?<!([a-zA-Z0-9]+)){identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
 
         lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9:]))"));
 

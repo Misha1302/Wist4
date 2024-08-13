@@ -43,7 +43,7 @@ public class Lexer(string source, ILogger logger)
         var left = Math.Clamp(pos - 10, 0, s.Length);
         var right = Math.Clamp(pos + 11, 0, s.Length);
         var message = s[left..right];
-        var bottom = string.Join("", message.Select((x, i) => i == 10 ? "|" : "~"));
+        var bottom = string.Join("", message.Select((_, i) => i == 10 ? "|" : "~"));
         return "\n" + message + "\n" + bottom;
     }
 }

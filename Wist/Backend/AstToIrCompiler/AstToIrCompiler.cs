@@ -146,11 +146,11 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 Instructions.Add(new IrInstruction(IrType.Ret, _stack.Pop()));
                 break;
             case If:
-                var ifLabel = $"if_false_{Guid.NewGuid()}";
-                _visitor.Visit(node.Children[0], HandleNode, _helper.NeedToVisitChildren);
-                Instructions.Add(new IrInstruction(IrType.BrFalse, Invalid, ifLabel));
-                _visitor.Visit(node.Children[1], HandleNode, _helper.NeedToVisitChildren);
-                Instructions.Add(new IrInstruction(IrType.DefineLabel, Invalid, ifLabel));
+                var endOfIfElifElse = $"end_if_elif_else_{Guid.NewGuid()}";
+
+                EmitIf(node, endOfIfElifElse);
+
+                Instructions.Add(new IrInstruction(IrType.DefineLabel, Invalid, endOfIfElifElse));
                 break;
             case Negation:
                 _stack.Pop1(I64);
@@ -214,6 +214,27 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             default:
                 throw new InvalidOperationException($"{node.Lexeme}");
         }
+    }
+
+    private void EmitIf(AstNode node, string endOfIfElifElse)
+    {
+        var elseLabel = $"else_{Guid.NewGuid()}";
+
+        _visitor.Visit(node.Children[0], HandleNode, _helper.NeedToVisitChildren);
+        Instructions.Add(new IrInstruction(IrType.BrFalse, Invalid, elseLabel));
+
+        _visitor.Visit(node.Children[1], HandleNode, _helper.NeedToVisitChildren);
+        Instructions.Add(new IrInstruction(IrType.Br, Invalid, endOfIfElifElse));
+
+        Instructions.Add(new IrInstruction(IrType.DefineLabel, Invalid, elseLabel));
+
+        if (node.Lexeme.LexemeType != If) return;
+        foreach (var elifOrElse in node.Children.Skip(2))
+            if (elifOrElse.Lexeme.LexemeType == Elif)
+                EmitIf(elifOrElse, endOfIfElifElse);
+            else _visitor.Visit(elifOrElse.Children[0], HandleNode, _helper.NeedToVisitChildren);
+
+        Instructions.Add(new IrInstruction(IrType.Br, Invalid, endOfIfElifElse));
     }
 
     private void CreateFunction(AstNode node)

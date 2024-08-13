@@ -3,30 +3,15 @@ import "CodeExamples/StdLib"
     
 
 main() -> i64 (
-    i64 ptr = array:new(5, 8)
-    for (i64 i = 0, i < 5, i = i + 1, 
-        array:set(ptr, i, 8, (i + 10) * (i % 3 + 2))
+    for (i64 i = 0, i <= 5, i = i + 1,
+        printI64NoLn(i)
+        printStrNoLn(" ")
+        if (i <= 0) ( printStr("Zero") )
+        elif (i <= 1) ( printStr("One") )
+        elif (i <= 2) ( printStr("Two") )
+        elif (i <= 3) ( printStr("Three") )
+        else ( printStr("Unknown") )
     )
-    
-    Console::WriteNoLn("Numbers: ")
-    i64 sum = 0
-    for (i64 i = 0, i < 5, i = i + 1,
-        i64 a = array:get(ptr, i, 8)
-        sum = sum + a
-        printI64NoLn(a)
-        
-        if (i != 4) (
-            printStrNoLn(", ")
-        )
-    )
-    
-    printStr("")
-    printStrNoLn("Sum is: ")
-    printI64(sum)
-    
-    printStrNoLn("Average is: ")
-    printStr(Str::F64ToStr(Types::I64ToF64(sum) / 5.0))
-    
 
     ret 0
 )

@@ -2,9 +2,9 @@ using Wist.Backend.IrToAsmCompiler.TypeSystem;
 
 namespace Wist.Backend.AstToIrCompiler;
 
-public record IrLocalAlias(string Alias, IIrLocalInfo RealLocalInfo) : IIrLocalInfo
+public record IrLocalAlias(string Alias, List<IIrLocalInfo> RealLocalsInfo) : IIrLocalInfo
 {
-    public string RealName => RealLocalInfo.Name;
+    public string RealName => RealLocalsInfo[0].Name;
     public string Name => Alias;
-    public AsmValueType Type => RealLocalInfo.Type;
+    public AsmValueType Type => RealLocalsInfo[0].Type;
 }

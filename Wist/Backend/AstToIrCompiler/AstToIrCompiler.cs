@@ -14,19 +14,19 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 {
     private readonly CompilerHelper _helper = new();
 
-    private readonly IrImage _image = new([], new DllsManager(), new Dictionary<string, byte[]>(),
-        new Dictionary<string, IrStructure>());
+    private readonly IrImage _image = new([], new DllsManager(), [], []);
 
     private readonly ImprovedStack<AsmValueType> _stack = new();
     private readonly AstVisitor _visitor = new();
 
     private IrFunction _function = null!;
+
     private List<IrInstruction> Instructions => _function.Instructions;
 
     public IrImage Compile(AstNode root)
     {
-        _visitor.Visit(root, DefineFunctions, _ => true);
         _visitor.Visit(root, DefineStructures, _ => true);
+        _visitor.Visit(root, DefineFunctions, _ => true);
         _visitor.Visit(root, HandleNode, _helper.NeedToVisitChildren);
 
         Log();
@@ -77,28 +77,42 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
         var text = node.Lexeme.Text;
         switch (node.Lexeme.LexemeType)
         {
-            case Identifier:
-                if (node.Parent?.Lexeme.LexemeType is Set or StructDeclaration) break;
-
-                var type = _function.Locals.First(x => x.Name == text).Type;
-                Instructions.Add(
-                    new IrInstruction(
-                        IrType.LoadLocalValue,
-                        type,
-                        text
-                    )
-                );
-                _stack.Push(type);
-
-                break;
             case Set:
-                type = _function.Locals.First(x => x.Name == node.Children[0].Lexeme.Text).Type;
+                var type = _function.Locals.First(x => x.Name == node.Children[0].Lexeme.Text).Type;
                 _stack.Pop1(type);
                 Instructions.Add(new IrInstruction(
                     IrType.SetLocal,
                     type,
                     node.Children[0].Lexeme.Text
                 ));
+                break;
+            case Identifier:
+                if (node.Parent?.Lexeme.LexemeType is Set or StructDeclaration) break;
+
+                var sourceIrLocalInfo = _function.Locals.First(x => x.Name == text);
+                switch (sourceIrLocalInfo)
+                {
+                    case IrRealLocalInfo:
+                        type = sourceIrLocalInfo.Type;
+                        Instructions.Add(new IrInstruction(IrType.LoadLocalValue, type, text));
+                        _stack.Push(type);
+                        break;
+                    case IrLocalAlias localAlias:
+                        var localAliasRealLocalsInfo = localAlias.RealLocalsInfo;
+                        for (var index = localAliasRealLocalsInfo.Count - 1; index >= 0; index--)
+                        {
+                            var irLocalInfo = localAliasRealLocalsInfo[index];
+                            Instructions.Add(
+                                new IrInstruction(IrType.LoadLocalValue, irLocalInfo.Type, irLocalInfo.Name)
+                            );
+                            _stack.Push(irLocalInfo.Type);
+                        }
+
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+
                 break;
             case Import:
                 // remove "
@@ -257,12 +271,13 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 
     private void CreateFunction(AstNode node)
     {
-        var parameters = node.Children[0].Children.Select(
-            x => (
-                name: x.Lexeme.Text,
-                type: x.Children[0].Lexeme.Text.ToAsmValueType()
+        var parameters = node.Children[0].Children.SelectMany(
+                x => GetExpandedLocal(x.Lexeme.Text, x.Children[0].Lexeme.Text)
             )
-        ).ToList();
+            .Where(x => x is IrRealLocalInfo)
+            .Cast<IrRealLocalInfo>()
+            .ToList();
+
         var returnType = node.Children[2].Lexeme.Text.ToAsmValueType();
         _image.Functions.Add(new IrFunction(node.Lexeme.Text, [], parameters, [], returnType));
     }
@@ -283,28 +298,40 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
         if (node.Lexeme.LexemeType != LexemeType.Type) return;
         if (node.Parent?.Lexeme.LexemeType != Identifier) return;
 
+        var expandedLocal = GetExpandedLocal(node.Parent!.Lexeme.Text, node.Lexeme.Text);
+        _function.Locals.AddRange(expandedLocal);
+    }
+
+    private List<IIrLocalInfo> GetExpandedLocal(string localName, string type)
+    {
         const string structureAndFieldSeparator = ":";
 
-        var type = node.Lexeme.Text;
-        var localName = node.Parent.Lexeme.Text;
+        var locals = (List<IIrLocalInfo>) [];
+
         if (!_image.Structures.TryGetValue(type, out var structure))
         {
-            _function.Locals.Add(new IrRealLocalInfo(localName, type.ToAsmValueType()));
+            locals.Add(new IrRealLocalInfo(localName, type.ToAsmValueType()));
         }
         else
         {
+            // why I can't use forward for and forward list without reverse? 
+
             // reversed to give an opportunity to get fields via +, not -
             // &tuple + 8 <-> tuple:item2
             for (var index = structure.Fields.Count - 1; index >= 0; index--)
             {
                 var field = structure.Fields[index];
                 var fieldName = localName + structureAndFieldSeparator + field.Name;
-                _function.Locals.Add(new IrRealLocalInfo(fieldName, field.Type));
+                locals.Add(new IrRealLocalInfo(fieldName, field.Type));
             }
 
-            // add an alias for first element 
-            var firstFieldName = localName + structureAndFieldSeparator + structure.Fields[0].Name;
-            _function.Locals.Add(new IrLocalAlias(localName, _function.Locals.First(x => x.Name == firstFieldName)));
+            // add an alias for all fields
+            // vec -> vec:x, vec:y, vec:z
+            var realLocalsInfo = (List<IIrLocalInfo>) [..locals];
+            realLocalsInfo.Reverse();
+            locals.Add(new IrLocalAlias(localName, realLocalsInfo));
         }
+
+        return locals;
     }
 }

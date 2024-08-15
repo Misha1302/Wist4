@@ -6,10 +6,19 @@ main() -> i64 (
     Vector3 vec = null
     Vector3:new(3, 4, 5, &vec)
 
-    printI64(vec:x)
-    printI64(vec:y)
-    printI64(vec:z)
+    Vector3:print(vec)
 
+    ret 0
+)
+
+Vector3:print(Vector3 vec) -> none (
+    printI64NoLn(vec:x)
+    printStrNoLn(" ")
+    printI64NoLn(vec:y)
+    printStrNoLn(" ")
+    printI64NoLn(vec:z)
+    printStr("")
+    
     ret 0
 )
 

@@ -346,7 +346,7 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         for (var i = 0; i < functionData.Parameters.Count; i++)
         {
             var parameter = functionData.Parameters[i];
-            data.Assembler.mov(__[rbp - _locals[parameter.name].Offset], registers[i].i64);
+            data.Assembler.mov(__[rbp - _locals[parameter.Name].Offset], registers[i].i64);
         }
     }
 

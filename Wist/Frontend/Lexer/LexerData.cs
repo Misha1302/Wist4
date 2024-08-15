@@ -73,7 +73,7 @@ public static class LexerData
         lds.Insert(0, new Ld(StructDeclaration, $"struct(?!({identifier}))"));
         lds.Insert(0,
             new Ld(FunctionDeclaration,
-                $@"(?=({whitespace}*))(?<!([a-zA-Z0-9]+)){identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
+                $@"(?=({whitespace}*))(?<!([a-zA-Z0-9:]+)){identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9:{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
 
         lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9:]))"));
 

@@ -1,4 +1,4 @@
-code -> ?preprocessor -> lexer -> astMaker -> codeGenerator (template maker) -> ?astOptimizer -> astCompilerToIr -> ?irOptimizer -> irCompilerToAsm
+code -> ?preprocessor -> lexer -> astMaker -> ?codeGenerator (template maker) -> ?astOptimizer -> astCompilerToIr -> ?irOptimizer -> irCompilerToAsm
 
-
-add debugger
+1. add more than 4/6 arguments in functions
+2. structure's assignments

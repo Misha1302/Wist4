@@ -246,7 +246,8 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 
     private void LoadLocal(string text)
     {
-        var sourceIrLocalInfo = _function.Locals.First(x => x.Name == text);
+        var sourceIrLocalInfo = _function.Locals.FirstOrDefault(x => x.Name == text);
+        if (sourceIrLocalInfo == null) throw new InvalidOperationException($"{text} local was not found");
         switch (sourceIrLocalInfo)
         {
             case IrRealLocalInfo:

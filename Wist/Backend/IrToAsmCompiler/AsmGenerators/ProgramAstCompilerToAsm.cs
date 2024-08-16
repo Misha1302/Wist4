@@ -26,6 +26,8 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 
     private void Log()
     {
+        if (_invalidStackFunctions.Count == 0) return;
+
         var sb = new StringBuilder();
         sb.AppendLine("Compiler found some invalid functions:");
 

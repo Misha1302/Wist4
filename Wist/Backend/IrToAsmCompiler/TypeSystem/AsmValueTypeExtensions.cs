@@ -6,6 +6,7 @@ public static class AsmValueTypeExtensions
     {
         ["long"] = AsmValueType.Int64,
         ["double"] = AsmValueType.Float64,
+        ["ptr"] = AsmValueType.Int64,
         ["i64"] = AsmValueType.Int64,
         ["f64"] = AsmValueType.Float64,
         ["none"] = AsmValueType.None,
@@ -26,5 +27,10 @@ public static class AsmValueTypeExtensions
     public static AsmValueType SharpTypeToAsmValueType(this Type type)
     {
         return _sharpTypesToAsmTypes[type];
+    }
+
+    public static bool IsReferenceType(this string s)
+    {
+        return s == "ptr";
     }
 }

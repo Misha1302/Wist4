@@ -4,9 +4,9 @@ import "CodeExamples/StdLib"
 
 main() -> i64 (
     Vector3 vec = null
-    Vector3:new(3, 4, 5, &vec)
-
-    Vector3:print(vec)
+    
+    vec.new(3, 4, 5)
+    vec.print()
 
     ret 0
 )
@@ -22,7 +22,7 @@ Vector3:print(Vector3 vec) -> none (
     ret 0
 )
 
-Vector3:new(i64 x, i64 y, i64 z, i64 structPtr) -> none (
+Vector3:new(ptr structPtr, i64 x, i64 y, i64 z) -> none (
     Mem::WriteMemI64(structPtr, x)
     Mem::WriteMemI64(structPtr + 8, y)
     Mem::WriteMemI64(structPtr + 16, z)

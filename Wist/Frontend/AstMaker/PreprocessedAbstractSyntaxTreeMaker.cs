@@ -8,7 +8,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
 {
     private static readonly HashSet<LexemeType>[] _lexemeTypes =
     [
-        [Goto, For, Import, FunctionDeclaration, FunctionCall, StructDeclaration, GettingRef, LexemeType.Type],
+        [Goto, For, Import, FunctionDeclaration, FunctionCall, StructDeclaration, GettingRef, LexemeType.Type, Dot],
         [Mul, Div, Modulo],
         [Plus, Minus],
         [Equal, NotEqual],
@@ -66,6 +66,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                 if (curNode.Children.Count != 0) return i;
                 curNode.AddAndRemove(astNodes, i + 1, i + 2);
                 return i;
+            case Dot:
             case Modulo:
             case Minus:
             case Div:
@@ -131,7 +132,6 @@ public static class PreprocessedAbstractSyntaxTreeMaker
             case LexemeType.Int64:
             case LeftRectangle:
             case RightRectangle:
-            case Dot:
             case Arrow:
             case Comment:
             case Float64:

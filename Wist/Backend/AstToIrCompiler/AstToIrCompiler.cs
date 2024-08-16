@@ -3,6 +3,7 @@ using Wist.Backend.IrToAsmCompiler;
 using Wist.Backend.IrToAsmCompiler.AsmGenerators;
 using Wist.Backend.IrToAsmCompiler.TypeSystem;
 using Wist.Frontend.AstMaker;
+using Wist.Frontend.Lexer;
 using Wist.Frontend.Lexer.Lexemes;
 using Wist.Statistics.Logger;
 using static Wist.Backend.IrToAsmCompiler.TypeSystem.AsmValueType;
@@ -46,7 +47,7 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 
         var fields = node.Children[1].Children
             .Where(x => x.Lexeme.LexemeType != Comma)
-            .Select(x => new IrStructureField(x.Lexeme.Text, x.Children[0].Lexeme.Text.ToAsmValueType()))
+            .Select(x => new IrStructureField(x.Lexeme.Text, x.Children[0].Lexeme.Text))
             .ToList();
         var structDecl = new IrStructure(node.Children[0].Lexeme.Text, fields);
         _image.Structures.Add(structDecl.Name, structDecl);
@@ -87,40 +88,15 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 ));
                 break;
             case Identifier:
-                if (node.Parent?.Lexeme.LexemeType is Set or StructDeclaration) break;
-
-                var sourceIrLocalInfo = _function.Locals.First(x => x.Name == text);
-                switch (sourceIrLocalInfo)
-                {
-                    case IrRealLocalInfo:
-                        type = sourceIrLocalInfo.Type;
-                        Instructions.Add(new IrInstruction(IrType.LoadLocalValue, type, text));
-                        _stack.Push(type);
-                        break;
-                    case IrLocalAlias localAlias:
-                        var localAliasRealLocalsInfo = localAlias.RealLocalsInfo;
-                        for (var index = localAliasRealLocalsInfo.Count - 1; index >= 0; index--)
-                        {
-                            var irLocalInfo = localAliasRealLocalsInfo[index];
-                            Instructions.Add(
-                                new IrInstruction(IrType.LoadLocalValue, irLocalInfo.Type, irLocalInfo.Name)
-                            );
-                            _stack.Push(irLocalInfo.Type);
-                        }
-
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-
+                if (node.Parent?.Lexeme.LexemeType is Set or StructDeclaration or Dot) break;
+                LoadLocal(text);
                 break;
             case Import:
                 // remove "
                 _image.DllsManager.Import(node.Children[0].Lexeme.Text[1..^1]);
                 break;
             case GettingRef:
-                Instructions.Add(new IrInstruction(IrType.GetReference, Invalid, node.Children[0].Lexeme.Text));
-                _stack.Push(I64);
+                LoadReference(node.Children[0].Lexeme.Text);
                 break;
             case FunctionDeclaration:
                 _function = _image.Functions.First(x => x.Name == node.Lexeme.Text);
@@ -195,19 +171,32 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 Instructions.Add(new IrInstruction(IrType.DefineLabel, Invalid, text[..^1]));
                 break;
             case FunctionCall:
+                var fullFunctionName = MakeFullFunctionName(node);
+
+                if (node.Parent?.Lexeme.LexemeType == Dot)
+                {
+                    var firstParam = _image.Functions.First(x => x.Name == fullFunctionName).Parameters[0];
+                    var local = node.Parent.Children[0];
+                    if (firstParam.TypeAsStr.IsReferenceType())
+                        LoadReference(local.Lexeme.Text);
+                    else LoadLocal(local.Lexeme.Text);
+                }
+
                 _visitor.Visit(node.Children[0], HandleNode, _helper.NeedToVisitChildren);
-                var isSharpFunc = _image.DllsManager.HaveFunction(text);
-                var isJustFunc = _image.Functions.Any(x => x.Name == text);
+
+                var isSharpFunc = _image.DllsManager.HaveFunction(fullFunctionName);
+                var isJustFunc = _image.Functions.Any(x => x.Name == fullFunctionName);
                 if (!isSharpFunc && !isJustFunc)
-                    throw new InvalidOperationException($"Function {text} is unknown. Did you forgot write namespace?");
+                    throw new InvalidOperationException(
+                        $"Function {fullFunctionName} is unknown. Did you forgot write namespace?");
 
                 Instructions.Add(isSharpFunc
-                    ? new IrInstruction(IrType.CallSharpFunction, Invalid, text)
-                    : new IrInstruction(IrType.CallFunction, Invalid, text));
+                    ? new IrInstruction(IrType.CallSharpFunction, Invalid, fullFunctionName)
+                    : new IrInstruction(IrType.CallFunction, Invalid, fullFunctionName));
 
                 _stack.Push(isSharpFunc
-                    ? _image.DllsManager.GetPointerOf(text).returnType.SharpTypeToAsmValueType()
-                    : _image.Functions.First(x => x.Name == text).ReturnType
+                    ? _image.DllsManager.GetPointerOf(fullFunctionName).returnType.SharpTypeToAsmValueType()
+                    : _image.Functions.First(x => x.Name == fullFunctionName).ReturnType
                 );
                 break;
             case LexemeType.String:
@@ -226,6 +215,7 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case LexemeType.Type:
             case Comma:
             case StructDeclaration:
+            case Dot:
                 break;
             case As:
             case Alias:
@@ -237,7 +227,6 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case LexemeType.Int32:
             case LeftRectangle:
             case RightRectangle:
-            case Dot:
             case Elif:
             case Else:
             case Spaces:
@@ -246,6 +235,49 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             default:
                 throw new InvalidOperationException($"{node.Lexeme}");
         }
+    }
+
+    private void LoadReference(string localName)
+    {
+        Instructions.Add(new IrInstruction(IrType.GetReference, Invalid, localName));
+        _stack.Push(I64);
+    }
+
+    private void LoadLocal(string text)
+    {
+        var sourceIrLocalInfo = _function.Locals.First(x => x.Name == text);
+        switch (sourceIrLocalInfo)
+        {
+            case IrRealLocalInfo:
+                var type = sourceIrLocalInfo.Type;
+                Instructions.Add(new IrInstruction(IrType.LoadLocalValue, type, text));
+                _stack.Push(type);
+                break;
+            case IrLocalAlias localAlias:
+                var localAliasRealLocalsInfo = localAlias.RealLocalsInfo;
+                for (var index = localAliasRealLocalsInfo.Count - 1; index >= 0; index--)
+                {
+                    var irLocalInfo = localAliasRealLocalsInfo[index];
+                    Instructions.Add(
+                        new IrInstruction(IrType.LoadLocalValue, irLocalInfo.Type, irLocalInfo.Name)
+                    );
+                    _stack.Push(irLocalInfo.Type);
+                }
+
+                break;
+            default:
+                throw new InvalidOperationException();
+        }
+    }
+
+    private string MakeFullFunctionName(AstNode node)
+    {
+        if (node.Parent?.Lexeme.LexemeType != Dot)
+            return node.Lexeme.Text;
+
+        var alias = _function.Locals.First(x => x.Name == node.Parent.Children[0].Lexeme.Text) as IrLocalAlias;
+        if (alias == null) throw new InvalidOperationException("Left expression above dot must be alias of local");
+        return alias.AliasType + LexerData.StructureAndFieldSeparator + node.Lexeme.Text;
     }
 
     private void EmitIf(AstNode node, string endOfIfElifElse)
@@ -304,13 +336,11 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 
     private List<IIrLocalInfo> GetExpandedLocal(string localName, string type)
     {
-        const string structureAndFieldSeparator = ":";
-
         var locals = (List<IIrLocalInfo>) [];
 
         if (!_image.Structures.TryGetValue(type, out var structure))
         {
-            locals.Add(new IrRealLocalInfo(localName, type.ToAsmValueType()));
+            locals.Add(new IrRealLocalInfo(localName, type));
         }
         else
         {
@@ -321,15 +351,15 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             for (var index = structure.Fields.Count - 1; index >= 0; index--)
             {
                 var field = structure.Fields[index];
-                var fieldName = localName + structureAndFieldSeparator + field.Name;
-                locals.Add(new IrRealLocalInfo(fieldName, field.Type));
+                var fieldName = localName + LexerData.StructureAndFieldSeparator + field.Name;
+                locals.Add(new IrRealLocalInfo(fieldName, field.TypeAsStr));
             }
 
             // add an alias for all fields
             // vec -> vec:x, vec:y, vec:z
             var realLocalsInfo = (List<IIrLocalInfo>) [..locals];
             realLocalsInfo.Reverse();
-            locals.Add(new IrLocalAlias(localName, realLocalsInfo));
+            locals.Add(new IrLocalAlias(localName, realLocalsInfo, type));
         }
 
         return locals;

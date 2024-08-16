@@ -7,9 +7,12 @@ using Ld = LexemeDeclaration;
 
 public static class LexerData
 {
-    public static List<Ld> GetLexemeDeclarations()
+    public const string StructureAndFieldSeparator = ":";
+    private static readonly ImprovedList<Ld> _lds;
+
+    static LexerData()
     {
-        var lds = new List<Ld>
+        _lds = new ImprovedList<Ld>
         {
             new(Comment, @"//[^\r\n]*"),
             new(NewLine, ";"),
@@ -55,28 +58,28 @@ public static class LexerData
         const string whitespace = @"[ \t]";
         const string spacesWithNl = @"\s";
 
-        var integer = lds.Get(Int64).Pattern;
-        var identifier = lds.Get(Identifier).Pattern;
-        var arrow = lds.Get(Arrow).Pattern;
-        var keywords = string.Join("|", lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
+        var integer = _lds.Get(Int64).Pattern;
+        var identifier = _lds.Get(Identifier).Pattern;
+        var arrow = _lds.Get(Arrow).Pattern;
+        var keywords = string.Join("|", _lds.Where(x => x.Pattern.All(char.IsLetter)).Select(x => x.Pattern));
         var first = $"(?<=[^a-zA-Z])(?!({keywords})){identifier}(?=({whitespace}+{identifier}))";
         var second = $"(?<=({arrow}{whitespace}*))(?!({keywords})){identifier}";
-        lds.Insert(0, new Ld(Type, $"({first})|({second})\\*?"));
+        _lds.Insert(0, new Ld(Type, $"({first})|({second})\\*?"));
 
-        lds.Insert(0, new Ld(Int32, $"{integer}s"));
-        lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
-        lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
-        lds.Insert(0,
+        _lds.Insert(0, new Ld(Int32, $"{integer}s"));
+        _lds.Insert(0, new Ld(Float64, integer + "\\." + integer));
+        _lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
+        _lds.Insert(0,
             new Ld(FunctionCall,
-                $"(?<!(struct[ \\t]*)){identifier}(?=({lds.Get(LeftPar).Pattern}))(?!(.+\\s*\\-\\>))"));
-        lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
-        lds.Insert(0, new Ld(StructDeclaration, $"struct(?!({identifier}))"));
-        lds.Insert(0,
+                $"(?<!(struct[ \\t]*)){identifier}(?=({_lds.Get(LeftPar).Pattern}))(?!(.+\\s*\\-\\>))"));
+        _lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
+        _lds.Insert(0, new Ld(StructDeclaration, $"struct(?!({identifier}))"));
+        _lds.Insert(0,
             new Ld(FunctionDeclaration,
                 $@"(?=({whitespace}*))(?<!([a-zA-Z0-9:]+)){identifier}{spacesWithNl}*(?=(\({spacesWithNl}*[a-zA-Z0-9:{spacesWithNl},]*\){spacesWithNl}*\-\>))"));
 
-        lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9:]))"));
-
-        return lds;
+        _lds.Insert(0, new Ld(Label, "[a-zA-Z_][a-zA-Z_0-9:]*:(?!([a-zA-Z0-9:]))"));
     }
+
+    public static IReadonlyListWithIndexOf<Ld> LexemeDeclarations => _lds;
 }

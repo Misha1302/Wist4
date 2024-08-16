@@ -6,18 +6,16 @@ namespace Wist.Frontend.Lexer;
 
 public class Lexer(string source, ILogger logger)
 {
-    private readonly List<LexemeDeclaration> _lexemeDeclarations = LexerData.GetLexemeDeclarations();
-
     public List<Lexeme> Lexeme()
     {
         var lexemes = new List<Lexeme>();
         var pos = 0;
-        var regex = _lexemeDeclarations
+        var regex = LexerData.LexemeDeclarations
             .Select(x => (decl: x, matches: Regex.Matches(source, x.Pattern)))
             .SelectMany(x => x.matches.Select(y => (x.decl, match: y)))
             .Where(x => x.match.Success)
             .OrderBy(x => x.match.Index)
-            .ThenBy(x => _lexemeDeclarations.IndexOf(x.decl))
+            .ThenBy(x => LexerData.LexemeDeclarations.IndexOf(x.decl))
             .ToList();
 
 

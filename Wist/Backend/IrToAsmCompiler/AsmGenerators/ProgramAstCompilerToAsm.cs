@@ -1,3 +1,4 @@
+using System.Text;
 using Iced.Intel;
 using Wist.Backend.AstToIrCompiler;
 using Wist.Backend.Executing;
@@ -7,6 +8,7 @@ namespace Wist.Backend.IrToAsmCompiler.AsmGenerators;
 
 public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
 {
+    private readonly List<(string funcName, int endSp)> _invalidStackFunctions = new();
     private AstCompilerData _data = null!;
 
     public IExecutable Compile(IrImage image)
@@ -17,7 +19,21 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
         EmitStartPoint();
         EmitStaticData(image.StaticData);
         EmitFunctionCodes(image.Functions);
-        return GetExecutable();
+        var executable = GetExecutable();
+        Log();
+        return executable;
+    }
+
+    private void Log()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Compiler found some invalid functions:");
+
+        foreach (var (funcName, endSp) in _invalidStackFunctions)
+            sb.AppendLine($"Function '{funcName}' have invalid stack (out sp: {endSp})");
+
+        sb.Remove(sb.Length - 1, 1);
+        logger.Log(sb.ToString());
     }
 
     private void EmitStaticData(Dictionary<string, byte[]> staticData)
@@ -53,7 +69,12 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
     private void EmitFunctionCodes(List<IrFunction> functions)
     {
         foreach (var function in functions)
+        {
+            _data.StackManager.Clear();
             new IrFunctionCompilerToAsm(_data, function).Compile(function.Instructions);
+            if (_data.StackManager.Sp != 0)
+                _invalidStackFunctions.Add((function.ToString(), _data.StackManager.Sp));
+        }
     }
 
     private void EmitStartPoint()

@@ -3,10 +3,14 @@ import "CodeExamples/StdLib"
     
 
 main() -> i64 (
-    Vector3 vec = null
+    Vector3 vec
     
     vec.new(3, 4, 5)
     vec.print()
+    
+    1
+    2
+    3
 
     ret 0
 )

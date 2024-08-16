@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Iced.Intel;
 using Wist.Backend.IrToAsmCompiler.TypeSystem;
 
@@ -7,10 +6,10 @@ namespace Wist.Backend.IrToAsmCompiler.AsmGenerators;
 
 public class StackManager(Assembler assembler)
 {
-    private readonly Stack<AsmValueType> _stackValueInfos = new();
+    private Stack<AsmValueType> _stackValueInfos = new();
     public int Sp => _stackValueInfos.Count * 8;
 
-    [MethodImpl(MethodImplOptions.NoOptimization)]
+
     public void PopStub()
     {
         var asmValueType = _stackValueInfos.Pop();
@@ -68,5 +67,10 @@ public class StackManager(Assembler assembler)
         }
 
         Debug.Assert(deltaSp == 0);
+    }
+
+    public void Clear()
+    {
+        _stackValueInfos = new Stack<AsmValueType>();
     }
 }

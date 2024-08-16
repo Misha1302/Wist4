@@ -1,1 +1,4 @@
-code -> ?preprocessor -> lexer -> astMaker -> ?astOptimizer -> astCompilerToIr -> ?irOptimizer -> irCompilerToAsm
+code -> ?preprocessor -> lexer -> astMaker -> codeGenerator (template maker) -> ?astOptimizer -> astCompilerToIr -> ?irOptimizer -> irCompilerToAsm
+
+
+add debugger

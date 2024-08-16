@@ -89,6 +89,7 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                 break;
             case Identifier:
                 if (node.Parent?.Lexeme.LexemeType is Set or StructDeclaration or Dot) break;
+                if (node.Children.Count > 0 && node.Children[0].Lexeme.LexemeType == LexemeType.Type) break;
                 LoadLocal(text);
                 break;
             case Import:

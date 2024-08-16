@@ -33,7 +33,7 @@ public class ProgramAstCompilerToAsm(ILogger logger) : IAstCompiler
             sb.AppendLine($"Function '{funcName}' have invalid stack (out sp: {endSp})");
 
         sb.Remove(sb.Length - 1, 1);
-        logger.Log(sb.ToString());
+        logger.Log(sb.ToString(), LogType.Warning);
     }
 
     private void EmitStaticData(Dictionary<string, byte[]> staticData)

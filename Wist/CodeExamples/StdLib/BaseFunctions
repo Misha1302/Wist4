@@ -6,7 +6,7 @@ printI64NoLn(i64 value) -> none ( printStrNoLn(Str::I64ToStr(value)); ret 0 )
 printStr(i64 stringPtr) -> none ( Console::Write(stringPtr); ret 0 )
 printI64(i64 value) -> none ( printStr(Str::I64ToStr(value)); ret 0 )
 inputStr() -> i64 ( ret Console::Read() )
-inputI64(i64 value) -> none ( ret Str::StrToI64(inputStr()) )
+inputI64(i64 value) -> i64 ( ret Str::StrToI64(inputStr()) )
 
 array:new(i64 len, i64 itemLen) -> i64 ( i64 ptr = Allocator::Calloc(len * itemLen); Mem::WriteMemI64(ptr - 8, len); ret ptr )
 array:len(i64 ptr) -> i64 ( ret Mem::ReadMemI64(ptr - 8) )

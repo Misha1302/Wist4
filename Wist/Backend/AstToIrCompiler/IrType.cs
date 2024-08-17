@@ -2,6 +2,8 @@ namespace Wist.Backend.AstToIrCompiler;
 
 public enum IrType
 {
+    Invalid,
+
     Add,
     Sub,
     Div,
@@ -32,4 +34,5 @@ public enum IrType
     BrFalse,
 
     GetReference,
+    Nop,
 }

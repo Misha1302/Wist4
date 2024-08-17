@@ -174,6 +174,11 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case FunctionCall:
                 var fullFunctionName = MakeFullFunctionName(node);
 
+                var sp = _stack.Count;
+
+                var irInstruction = new IrInstruction(IrType.Invalid, I64, 0L);
+                Instructions.Add(irInstruction);
+
                 if (node.Parent?.Lexeme.LexemeType == Dot)
                 {
                     var firstParam = _image.Functions.First(x => x.Name == fullFunctionName).Parameters[0];
@@ -183,7 +188,12 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                     else LoadLocal(local.Lexeme.Text);
                 }
 
+
                 _visitor.Visit(node.Children[0], HandleNode, _helper.NeedToVisitChildren);
+                var endSp = _stack.Count;
+                var needToPushStub = (endSp - sp) % 2 == 1;
+                var bytesToDrop = (endSp - sp) * 8 + (needToPushStub ? 8 : 0);
+                irInstruction.Instruction = !needToPushStub ? IrType.Nop : IrType.Push;
 
                 var isSharpFunc = _image.DllsManager.HaveFunction(fullFunctionName);
                 var isJustFunc = _image.Functions.Any(x => x.Name == fullFunctionName);
@@ -191,9 +201,17 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
                     throw new InvalidOperationException(
                         $"Function {fullFunctionName} is unknown. Did you forgot write namespace?");
 
+                var condNeedToPop = isSharpFunc ? needToPushStub ? 8L : 0L : bytesToDrop;
                 Instructions.Add(isSharpFunc
-                    ? new IrInstruction(IrType.CallSharpFunction, Invalid, fullFunctionName)
-                    : new IrInstruction(IrType.CallFunction, Invalid, fullFunctionName));
+                    ? new IrInstruction(IrType.CallSharpFunction, Invalid, fullFunctionName, condNeedToPop)
+                    : new IrInstruction(IrType.CallFunction, Invalid, fullFunctionName, condNeedToPop)
+                );
+
+                while (condNeedToPop >= 8)
+                {
+                    _stack.Pop();
+                    condNeedToPop -= 8;
+                }
 
                 _stack.Push(isSharpFunc
                     ? _image.DllsManager.GetPointerOf(fullFunctionName).returnType.SharpTypeToAsmValueType()

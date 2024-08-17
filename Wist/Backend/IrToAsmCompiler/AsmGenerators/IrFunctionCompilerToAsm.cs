@@ -134,6 +134,9 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             case IrType.Mod:
                 EmitModulo();
                 break;
+            case IrType.Drop:
+                data.StackManager.Drop((int)instruction.Get<long>());
+                break;
             case IrType.BrFalse:
                 data.StackManager.Pop(r14);
                 data.Assembler.cmp(r14, 0);
@@ -142,12 +145,17 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             case IrType.GetReference:
                 EmitGetRef(instruction.Get<string>());
                 break;
+            case IrType.Nop:
+                data.Assembler.nop();
+                break;
             case IrType.CallSharpFunction:
                 var funcToCall = data.Image.DllsManager.GetPointerOf(instruction.Get<string>());
                 Call(
                     funcToCall.parameters.Length,
                     funcToCall.returnType.SharpTypeToAsmValueType(),
-                    () => DirectCall((ulong)funcToCall.ptr)
+                    () => DirectCall((ulong)funcToCall.ptr),
+                    false,
+                    (int)instruction.Get<long>(1)
                 );
                 break;
             case IrType.CallFunction:
@@ -158,7 +166,9 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
                 Call(
                     irFunction.Parameters.Count,
                     irFunction.ReturnType,
-                    () => data.Assembler.call(data.Labels[irFunction.Name].LabelByRef)
+                    () => data.Assembler.call(data.Labels[irFunction.Name].LabelByRef),
+                    true,
+                    (int)instruction.Get<long>(1)
                 );
                 break;
             default:
@@ -166,9 +176,11 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         }
     }
 
-    private void Call(int paramsCount, AsmValueType returnType, Action call)
+    private void Call(int paramsCount, AsmValueType returnType, Action call, bool passArgumentsViaStack,
+        int bytesToDrop)
     {
-        LoadArgumentsToRegisters(paramsCount);
+        if (!passArgumentsViaStack)
+            LoadArgumentsToRegisters(paramsCount);
 
         var needToPushPopStub = data.StackManager.Sp % 16 != 0;
         if (needToPushPopStub) data.StackManager.PushStub();
@@ -176,6 +188,7 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         call();
 
         if (needToPushPopStub) data.StackManager.PopStub();
+        data.StackManager.Drop(bytesToDrop);
 
         if (returnType == AsmValueType.I64)
             data.StackManager.Push(rax);
@@ -339,14 +352,14 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
 
     private void EmitParameters()
     {
-        var registers = OS.IsLinux()
-            ? CallConventions.SystemVAmd64Abi.ArgumentRegisters
-            : CallConventions.MicrosoftX64.ArgumentRegisters;
+        var paramsAllocBytes = (functionData.Parameters.Count + functionData.Parameters.Count % 2) * 8;
+        data.Assembler.sub(rsp, paramsAllocBytes);
 
         for (var i = 0; i < functionData.Parameters.Count; i++)
         {
             var parameter = functionData.Parameters[i];
-            data.Assembler.mov(__[rbp - _locals[parameter.Name].Offset], registers[i].i64);
+            data.Assembler.mov(r14, __[rbp + 16 + (functionData.Parameters.Count - i - 1) * 8]);
+            data.Assembler.mov(__[rbp - _locals[parameter.Name].Offset], r14);
         }
     }
 

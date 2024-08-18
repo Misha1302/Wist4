@@ -19,15 +19,15 @@ public class AbstractSyntaxTreeMaker(List<Lexeme> lexemes, ILogger logger)
         MakeLinearNodes();
         MakeScopes(0, [(LeftPar, RightPar), (LeftBrace, RightBrace)]);
         MakeChildrenForFunctions(_root.Children);
-        MakeOperationsNodes(_root.Children);
+        MakeOperationsNodes(_root.Children, 0);
         logger.Log(_root.ToString());
 
         return _root;
     }
 
-    private void MakeOperationsNodes(List<AstNode> rootChildren)
+    private void MakeOperationsNodes(List<AstNode> rootChildren, int i)
     {
-        new PreprocessedAbstractSyntaxTreeMaker().MakeOperationsNodes(rootChildren);
+        PreprocessedAbstractSyntaxTreeMaker.MakeOperationsNodes(rootChildren, i);
     }
 
     private void MakeChildrenForFunctions(List<AstNode> nodes)

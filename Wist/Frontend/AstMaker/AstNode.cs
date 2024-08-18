@@ -2,31 +2,21 @@
 
 namespace Wist.Frontend.AstMaker;
 
-public sealed class AstNode
+public class AstNode(Lexeme lexeme, List<AstNode> children, AstNode? parent, int number)
 {
-    public readonly List<AstNode> Children;
-    public readonly int Hash;
-    public readonly Lexeme Lexeme;
-    public readonly int Number;
-    public AstNode? Parent;
+    public readonly int Number = number;
+    public List<AstNode> Children = children;
+    public Lexeme Lexeme = lexeme;
+    public AstNode? Parent = parent;
 
-    public AstNode(Lexeme lexeme, List<AstNode> children, AstNode? parent, int number)
+    public override int GetHashCode()
     {
-        Number = number;
-        Children = children;
-        Lexeme = lexeme;
-        Parent = parent;
-        Hash = GetHashCode();
+        // ReSharper disable NonReadonlyMemberInGetHashCode
+        return Children.Aggregate(
+            Lexeme.GetHashCode(),
+            (a, b) => a ^ b.GetHashCode()
+        );
     }
-
-    // public override int GetHashCode()
-    // {
-    //     // ReSharper disable NonReadonlyMemberInGetHashCode
-    //     return Children.Aggregate(
-    //         Lexeme.GetHashCode(),
-    //         (a, b) => a ^ b.GetHashCode()
-    //     );
-    // }
 
     public override string ToString()
     {

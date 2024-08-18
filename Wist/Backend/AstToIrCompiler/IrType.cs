@@ -35,4 +35,6 @@ public enum IrType
 
     GetReference,
     Nop,
+    WriteToMem,
+    ReadMem,
 }

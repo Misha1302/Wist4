@@ -10,7 +10,8 @@ public class CompilerHelper
     public bool NeedToVisitChildren(AstNode node)
     {
         return node.Lexeme.LexemeType is not If and not Elif and not Else and not Goto and not For and not Import
-            and not FunctionCall and not GettingRef and not FunctionDeclaration and not StructDeclaration;
+            and not FunctionCall and not GettingRef and not FunctionDeclaration and not StructDeclaration
+            and not ReadMem;
     }
 
     public (Dictionary<string, LocalInfo> locals, int allocationBytes) GetInfoAboutLocals(List<IIrLocalInfo> locals)

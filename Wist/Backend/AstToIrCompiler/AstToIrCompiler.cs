@@ -171,6 +171,13 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
             case Label:
                 Instructions.Add(new IrInstruction(IrType.DefineLabel, Invalid, text[..^1]));
                 break;
+            case WriteToMem:
+                Instructions.Add(new IrInstruction(IrType.WriteToMem, _stack.Pop()));
+                break;
+            case ReadMem:
+                _visitor.Visit(node.Children[1], HandleNode, _helper.NeedToVisitChildren);
+                Instructions.Add(new IrInstruction(IrType.ReadMem, node.Children[0].Lexeme.Text.ToAsmValueType()));
+                break;
             case FunctionCall:
                 var fullFunctionName = MakeFullFunctionName(node);
 

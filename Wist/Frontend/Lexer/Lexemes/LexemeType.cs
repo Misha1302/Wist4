@@ -49,6 +49,8 @@ public enum LexemeType
     Float64,
     Character,
     StructDeclaration,
+    WriteToMem,
+    ReadMem,
 
 
     Scope,

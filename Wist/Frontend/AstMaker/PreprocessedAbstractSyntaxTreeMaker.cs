@@ -9,12 +9,13 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     private static readonly HashSet<LexemeType>[] _lexemeTypes =
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, StructDeclaration, GettingRef, LexemeType.Type, Dot],
+        [ReadMem],
         [Mul, Div, Modulo],
         [Plus, Minus],
         [Equal, NotEqual],
         [LessThan, GreaterThan, LessOrEquals, GreaterOrEquals],
         [Negation],
-        [Set],
+        [Set, WriteToMem],
         [Elif, Else],
         [If],
         [Ret],
@@ -53,6 +54,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                 if (astNodes.Count <= 1 || i + 1 >= astNodes.Count || astNodes[i + 1].Children.Count != 0) return i;
                 astNodes[i + 1].AddAndRemove(astNodes, i);
                 return i;
+            case WriteToMem:
             case Set:
                 if (curNode.Children.Count != 0) return i;
                 curNode.AddAndRemove(astNodes, i - 1, i + 1);
@@ -98,6 +100,10 @@ public static class PreprocessedAbstractSyntaxTreeMaker
                 curNode.AddAndRemove(astNodes, indicesToInclude.ToArray());
                 return i;
             case Elif:
+                if (curNode.Children.Count != 0) return i;
+                curNode.AddAndRemove(astNodes, i + 1, i + 2);
+                return i;
+            case ReadMem:
                 if (curNode.Children.Count != 0) return i;
                 curNode.AddAndRemove(astNodes, i + 1, i + 2);
                 return i;

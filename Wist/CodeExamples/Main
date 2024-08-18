@@ -38,17 +38,17 @@ Vector3:new(ptr structPtr, i64 x, i64 y, i64 z) -> none (
 )
 
 Vector3:add2(ptr vecPtr, Vector3 vec1, Vector3 vec2) -> none (
-    Mem::WriteMemI64(vecPtr + 0, vec1:x + vec2:x)
-    Mem::WriteMemI64(vecPtr + 8, vec1:y + vec2:y)
-    Mem::WriteMemI64(vecPtr + 16, vec1:z + vec2:z)
+    vecPtr + 0 <- vec1:x + vec2:x
+    vecPtr + 8 <- vec1:y + vec2:y
+    vecPtr + 16 <- vec1:z + vec2:z
     
     ret 0
 )
 
 Vector3:add(ptr vecPtr, Vector3 vec1) -> none (
-    Mem::WriteMemI64(vecPtr + 0, Mem::ReadMemI64(vecPtr + 0) + vec1:x)
-    Mem::WriteMemI64(vecPtr + 8, Mem::ReadMemI64(vecPtr + 8) + vec1:y)
-    Mem::WriteMemI64(vecPtr + 16, Mem::ReadMemI64(vecPtr + 16) + vec1:z)
+    vecPtr + 0 <- @i64(vecPtr + 0) + vec1:x
+    vecPtr + 8 <- @i64(vecPtr + 8) + vec1:y
+    vecPtr + 16 <- @i64(vecPtr + 16) + vec1:z
     
     ret 0
 )

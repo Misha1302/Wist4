@@ -38,6 +38,7 @@ public static class LexerData
             new(Int64, @"-?\d+[\d_]*\d*"),
             new(Dot, "\\."),
             new(Modulo, "\\%"),
+            new(WriteToMem, @"\<\-"),
             new(Plus, "\\+"),
             new(Mul, "\\*"),
             new(Div, "/"),
@@ -52,6 +53,7 @@ public static class LexerData
             new(GreaterThan, "\\>"),
             new(Comma, ","),
             new(Minus, @"\-"),
+            new(ReadMem, "@"),
             new(Identifier, "[a-zA-Z_][a-zA-Z_0-9:]*(?!(:))"),
         };
 
@@ -71,7 +73,7 @@ public static class LexerData
         _lds.Insert(0, new Ld(GettingRef, $"&(?=({identifier}))"));
         _lds.Insert(0,
             new Ld(FunctionCall,
-                $"(?<!(struct[ \\t]*)){identifier}(?=({_lds.Get(LeftPar).Pattern}))(?!(.+\\s*\\-\\>))"));
+                $"(?<!(struct[ \\t]*|@)){identifier}(?=({_lds.Get(LeftPar).Pattern}))(?!(.+\\s*\\-\\>))"));
         _lds.Insert(0, new Ld(Goto, $"goto (?=({identifier}))"));
         _lds.Insert(0, new Ld(StructDeclaration, $"struct(?!({identifier}))"));
         _lds.Insert(0,

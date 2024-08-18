@@ -3,36 +3,36 @@ import "CodeExamples/StdLib"
     
 
 main() -> i64 (
-    Vector3 vec1.new(3, 4, 5)
-    Vector3 vec2.new(7, 6, 5)
+    Vector3 vec1.new(3.0, 4.0, 5.0)
+    Vector3 vec2.new(7.0, 6.0, 5.0)
     Vector3 vec3.add2(vec1, vec2)
     
-    if (i64 q = vec1:x + vec2:x; q == 10) (
-        printI64(q)
-    )
+    /*if (f64 q = vec1:x + vec2:x; q == 10.0) (
+        printF64(q)
+    )*/
     
     vec3.print()
 
-    Vector3 vec4.new(7, 6, 5).print().add(vec3).print()
+    Vector3 vec4.new(7.0, 6.0, 5.0).print().add(vec3).print()
 
     ret 0
 )
 
 Vector3:print(Vector3 vec) -> none (
-    printI64NoLn(vec:x)
+    printF64NoLn(vec:x)
     printStrNoLn(" ")
-    printI64NoLn(vec:y)
+    printF64NoLn(vec:y)
     printStrNoLn(" ")
-    printI64NoLn(vec:z)
+    printF64NoLn(vec:z)
     printStr("")
     
     ret 0
 )
 
 Vector3:new(ptr structPtr, i64 x, i64 y, i64 z) -> none (
-    Mem::WriteMemI64(structPtr, x)
-    Mem::WriteMemI64(structPtr + 8, y)
-    Mem::WriteMemI64(structPtr + 16, z)
+    structPtr <- x
+    structPtr + 8 <- y
+    structPtr + 16 <- z
     
     ret 0
 )
@@ -46,12 +46,12 @@ Vector3:add2(ptr vecPtr, Vector3 vec1, Vector3 vec2) -> none (
 )
 
 Vector3:add(ptr vecPtr, Vector3 vec1) -> none (
-    vecPtr + 0 <- @i64(vecPtr + 0) + vec1:x
-    vecPtr + 8 <- @i64(vecPtr + 8) + vec1:y
-    vecPtr + 16 <- @i64(vecPtr + 16) + vec1:z
+    vecPtr + 0 <- @f64(vecPtr + 0) + vec1:x
+    vecPtr + 8 <- @f64(vecPtr + 8) + vec1:y
+    vecPtr + 16 <- @f64(vecPtr + 16) + vec1:z
     
     ret 0
 )
 
 
-struct Vector3(i64 x, i64 y, i64 z)
+struct Vector3(f64 x, f64 y, f64 z)

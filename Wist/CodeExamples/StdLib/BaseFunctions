@@ -2,11 +2,15 @@ import "../../../Libraries/net8.0/StandardLibrary.dll"
 
 printStrNoLn(i64 stringPtr) -> none ( Console::WriteNoLn(stringPtr); ret 0 )
 printI64NoLn(i64 value) -> none ( printStrNoLn(Str::I64ToStr(value)); ret 0 )
+printF64NoLn(i64 value) -> none ( printStrNoLn(Str::F64ToStr(value)); ret 0 )
 
 printStr(i64 stringPtr) -> none ( Console::Write(stringPtr); ret 0 )
 printI64(i64 value) -> none ( printStr(Str::I64ToStr(value)); ret 0 )
+printF64(i64 value) -> none ( printStr(Str::F64ToStr(value)); ret 0 )
+
 inputStr() -> i64 ( ret Console::Read() )
 inputI64(i64 value) -> i64 ( ret Str::StrToI64(inputStr()) )
+inputF64(i64 value) -> f64 ( ret Str::StrToF64(inputStr()) )
 
 array:new(i64 len, i64 itemLen) -> i64 ( i64 ptr = Allocator::Calloc(len * itemLen); Mem::WriteMemI64(ptr - 8, len); ret ptr )
 array:len(i64 ptr) -> i64 ( ret Mem::ReadMemI64(ptr - 8) )

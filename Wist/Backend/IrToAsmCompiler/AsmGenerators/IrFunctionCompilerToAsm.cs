@@ -86,9 +86,19 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
 
                 break;
             case IrType.WriteToMem:
-                data.StackManager.Pop(r15); // value
-                data.StackManager.Pop(r14); // address
-                data.Assembler.mov(__[r14], r15);
+                if (instruction.ValueTypeOfInstruction == AsmValueType.I64)
+                {
+                    data.StackManager.Pop(r15); // value
+                    data.StackManager.Pop(r14); // address
+                    data.Assembler.mov(__[r14], r15);
+                }
+                else
+                {
+                    data.StackManager.Pop(xmm0); // value
+                    data.StackManager.Pop(r14); // address
+                    data.Assembler.movq(__[r14], xmm0);
+                }
+
                 break;
             case IrType.Sub:
                 EmitSub();

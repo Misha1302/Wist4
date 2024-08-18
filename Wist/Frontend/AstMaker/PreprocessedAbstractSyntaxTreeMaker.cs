@@ -1,12 +1,13 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 using Wist.Frontend.Lexer.Lexemes;
 using static Wist.Frontend.Lexer.Lexemes.LexemeType;
 
 namespace Wist.Frontend.AstMaker;
 
-public static class PreprocessedAbstractSyntaxTreeMaker
+public class PreprocessedAbstractSyntaxTreeMaker
 {
-    private static readonly HashSet<LexemeType>[] _lexemeTypes =
+    private static readonly LexemeType[][] _lexemeTypes =
     [
         [Goto, For, Import, FunctionDeclaration, FunctionCall, StructDeclaration, GettingRef, LexemeType.Type, Dot],
         [ReadMem],
@@ -21,28 +22,60 @@ public static class PreprocessedAbstractSyntaxTreeMaker
         [Ret],
     ];
 
+    private readonly Dictionary<int, int> _astNodeLexemeTypeIndices = new(1024);
+    private FrozenDictionary<int, int> _astNodeLexemeTypeIndicesFrozen = null!;
+
+    private void PreprocessNodesToFastRecognition(List<AstNode> astNodes)
+    {
+        foreach (var t in astNodes)
+        {
+            PreprocessNodesToFastRecognition(t.Children);
+
+            var targetLevel = -1;
+            for (var level = 0; level < _lexemeTypes.Length; level++)
+            {
+                var lexemeTypes = _lexemeTypes[level];
+                var ind = Array.IndexOf(lexemeTypes, t.Lexeme.LexemeType);
+                if (ind < 0) continue;
+                targetLevel = level;
+                break;
+            }
+
+            _astNodeLexemeTypeIndices[t.Hash] = targetLevel;
+        }
+    }
+
     // 'cause method is too big, JIT don't want to optimize it (slow down = ~3 times). We need to point him to optimization
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public static void MakeOperationsNodes(List<AstNode> astNodes, int lexemeIndex)
+    public void MakeOperationsNodes(List<AstNode> astNodes)
+    {
+        _astNodeLexemeTypeIndices.Clear();
+        PreprocessNodesToFastRecognition(astNodes);
+        _astNodeLexemeTypeIndicesFrozen = _astNodeLexemeTypeIndices.ToFrozenDictionary();
+        MakeOperationsNodesInternal(astNodes, 0);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public void MakeOperationsNodesInternal(List<AstNode> astNodes, int lexemeIndex)
     {
         // ISSUE: very slow building deep nesting
-        var lexemeTypes = _lexemeTypes[lexemeIndex];
-
         for (var i = 0; i < astNodes.Count; i++)
         {
             var curNode = astNodes[i];
             var handlingType = curNode.Lexeme.LexemeType;
-            if (!lexemeTypes.Contains(handlingType)) continue;
+            // var targetLexemeIndex = CollectionsMarshal.GetValueRefOrNullRef(_astNodeLexemeTypeIndices, curNode.Hash);
+            if (_astNodeLexemeTypeIndicesFrozen[curNode.Hash] != lexemeIndex) continue;
+            // if (!_lexemeTypes[lexemeIndex].Contains(curNode.Lexeme.LexemeType)) continue;
 
             i = MakeNode(astNodes, handlingType, i, curNode);
         }
 
         // ReSharper disable once ForCanBeConvertedToForeach
         for (var index = 0; index < astNodes.Count; index++)
-            MakeOperationsNodes(astNodes[index].Children, lexemeIndex);
+            MakeOperationsNodesInternal(astNodes[index].Children, lexemeIndex);
 
         if (lexemeIndex + 1 < _lexemeTypes.Length)
-            MakeOperationsNodes(astNodes, lexemeIndex + 1);
+            MakeOperationsNodesInternal(astNodes, lexemeIndex + 1);
     }
 
     // 'cause method is too big, JIT don't want to optimize it (slow down = ~3 times). We need to point him to optimization

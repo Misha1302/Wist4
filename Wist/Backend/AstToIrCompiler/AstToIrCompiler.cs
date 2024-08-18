@@ -181,8 +181,9 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
 
                 if (node.Parent?.Lexeme.LexemeType == Dot)
                 {
+                    var local = GetIdentifierFromDotsChain(node);
+
                     var firstParam = _image.Functions.First(x => x.Name == fullFunctionName).Parameters[0];
-                    var local = node.Parent.Children[0];
                     if (firstParam.TypeAsStr.IsReferenceType())
                         LoadReference(local.Lexeme.Text);
                     else LoadLocal(local.Lexeme.Text);
@@ -295,9 +296,20 @@ public class AstToIrCompiler(ILogger logger) : IAstToIrCompiler
         if (node.Parent?.Lexeme.LexemeType != Dot)
             return node.Lexeme.Text;
 
-        var alias = _function.Locals.First(x => x.Name == node.Parent.Children[0].Lexeme.Text) as IrLocalAlias;
+
+        var parentChild = GetIdentifierFromDotsChain(node);
+
+        var alias = _function.Locals.First(x => x.Name == parentChild.Lexeme.Text) as IrLocalAlias;
         if (alias == null) throw new InvalidOperationException("Left expression above dot must be alias of local");
         return alias.AliasType + LexerData.StructureAndFieldSeparator + node.Lexeme.Text;
+    }
+
+    private static AstNode GetIdentifierFromDotsChain(AstNode node)
+    {
+        var parentChild = node.Parent!.Children[0];
+        while (parentChild.Lexeme.LexemeType == Dot)
+            parentChild = parentChild.Children[0];
+        return parentChild;
     }
 
     private void EmitIf(AstNode node, string endOfIfElifElse)

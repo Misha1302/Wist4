@@ -3,15 +3,17 @@ import "CodeExamples/StdLib"
     
 
 main() -> i64 (
-    Vector3 vec1
-    Vector3 vec2
-    Vector3 vec3
+    Vector3 vec1.new(3, 4, 5)
+    Vector3 vec2.new(7, 6, 5)
+    Vector3 vec3.add2(vec1, vec2)
     
-    vec1.new(3, 4, 5)
-    vec2.new(7, 6, 5)
-    vec3.add(vec1, vec2)
+    if (i64 q = vec1:x + vec2:x; q == 10) (
+        printI64(q)
+    )
     
     vec3.print()
+
+    Vector3 vec4.new(7, 6, 5).print().add(vec3).print()
 
     ret 0
 )
@@ -35,10 +37,18 @@ Vector3:new(ptr structPtr, i64 x, i64 y, i64 z) -> none (
     ret 0
 )
 
-Vector3:add(ptr vecPtr, Vector3 vec1, Vector3 vec2) -> none (
+Vector3:add2(ptr vecPtr, Vector3 vec1, Vector3 vec2) -> none (
     Mem::WriteMemI64(vecPtr + 0, vec1:x + vec2:x)
     Mem::WriteMemI64(vecPtr + 8, vec1:y + vec2:y)
     Mem::WriteMemI64(vecPtr + 16, vec1:z + vec2:z)
+    
+    ret 0
+)
+
+Vector3:add(ptr vecPtr, Vector3 vec1) -> none (
+    Mem::WriteMemI64(vecPtr + 0, Mem::ReadMemI64(vecPtr + 0) + vec1:x)
+    Mem::WriteMemI64(vecPtr + 8, Mem::ReadMemI64(vecPtr + 8) + vec1:y)
+    Mem::WriteMemI64(vecPtr + 16, Mem::ReadMemI64(vecPtr + 16) + vec1:z)
     
     ret 0
 )

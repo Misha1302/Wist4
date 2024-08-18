@@ -133,22 +133,22 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
                 EmitSet(instruction);
                 break;
             case IrType.CheckEquality:
-                LogicOp(data.Assembler.cmove);
+                LogicOp(data.Assembler.cmove, data.Assembler.cmpeqsd);
                 break;
             case IrType.CheckLessThan:
-                LogicOp(data.Assembler.cmovl);
+                LogicOp(data.Assembler.cmovl, data.Assembler.cmpltsd);
                 break;
             case IrType.CheckLessOrEquals:
-                LogicOp(data.Assembler.cmovle);
+                LogicOp(data.Assembler.cmovle, data.Assembler.cmplesd);
                 break;
             case IrType.CheckGreaterThan:
-                LogicOp(data.Assembler.cmovg);
+                LogicOp(data.Assembler.cmovg, data.Assembler.cmpnlesd);
                 break;
             case IrType.CheckGreaterOrEquals:
-                LogicOp(data.Assembler.cmovge);
+                LogicOp(data.Assembler.cmovge, data.Assembler.cmpnltsd);
                 break;
             case IrType.CheckInequality:
-                LogicOp(data.Assembler.cmovne);
+                LogicOp(data.Assembler.cmovne, data.Assembler.cmpneqsd);
                 break;
             case IrType.Negate:
                 EmitNegation();
@@ -267,8 +267,8 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             data.Assembler.add(__[rsp], r14);
         }, () =>
         {
-            data.StackManager.Pop(xmm0);
             data.StackManager.Pop(xmm1);
+            data.StackManager.Pop(xmm0);
             data.Assembler.addsd(xmm0, xmm1);
             data.StackManager.Push(xmm0);
         });
@@ -282,10 +282,10 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             data.Assembler.sub(__[rsp], r14);
         }, () =>
         {
-            data.StackManager.Pop(xmm0);
             data.StackManager.Pop(xmm1);
-            data.Assembler.subsd(xmm1, xmm0);
-            data.StackManager.Push(xmm1);
+            data.StackManager.Pop(xmm0);
+            data.Assembler.subsd(xmm0, xmm1);
+            data.StackManager.Push(xmm0);
         });
     }
 
@@ -299,8 +299,8 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             data.StackManager.Push(rax);
         }, () =>
         {
-            data.StackManager.Pop(xmm0);
             data.StackManager.Pop(xmm1);
+            data.StackManager.Pop(xmm0);
             data.Assembler.mulsd(xmm0, xmm1);
             data.StackManager.Push(xmm0);
         });
@@ -317,10 +317,10 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
             data.StackManager.Push(rax);
         }, () =>
         {
-            data.StackManager.Pop(xmm0);
             data.StackManager.Pop(xmm1);
-            data.Assembler.divsd(xmm1, xmm0);
-            data.StackManager.Push(xmm1);
+            data.StackManager.Pop(xmm0);
+            data.Assembler.divsd(xmm0, xmm1);
+            data.StackManager.Push(xmm0);
         });
     }
 
@@ -423,14 +423,34 @@ public class IrFunctionCompilerToAsm(AstCompilerData data, IrFunction functionDa
         }
     }
 
-    private void LogicOp(Action<AssemblerRegister64, AssemblerRegister64> asmOp)
+    private void LogicOp(
+        Action<AssemblerRegister64, AssemblerRegister64> asmOpI64,
+        Action<AssemblerRegisterXMM, AssemblerRegisterXMM> asmOpF64
+    )
     {
-        data.StackManager.Pop(r14);
-        data.StackManager.Pop(r15);
-        data.Assembler.cmp(r15, r14);
-        data.Assembler.mov(r14, 0);
-        data.Assembler.mov(r15, 1);
-        asmOp(r14, r15);
-        data.StackManager.Push(r14);
+        if (data.StackManager.Peek() == AsmValueType.I64)
+        {
+            data.StackManager.Pop(r14);
+            data.StackManager.Pop(r15);
+            data.Assembler.cmp(r15, r14);
+            data.Assembler.mov(r14, 0);
+            data.Assembler.mov(r15, 1);
+            asmOpI64(r14, r15);
+            data.StackManager.Push(r14);
+        }
+        else
+        {
+            // (r13 = cmp(xmm0, xmm1)) == 0 ? 0 : 1 
+
+            data.StackManager.Pop(xmm0);
+            data.StackManager.Pop(xmm1);
+            asmOpF64(xmm0, xmm1);
+            data.Assembler.movq(r13, xmm0);
+            data.Assembler.mov(r14, 0); // result
+            data.Assembler.mov(r15, 1);
+            data.Assembler.cmp(r13, 0);
+            data.Assembler.cmovne(r14, r15);
+            data.StackManager.Push(r14);
+        }
     }
 }

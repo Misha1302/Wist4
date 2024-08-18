@@ -25,6 +25,7 @@ public static class PreprocessedAbstractSyntaxTreeMaker
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static void MakeOperationsNodes(List<AstNode> astNodes, int lexemeIndex)
     {
+        // ISSUE: very slow building deep nesting
         var lexemeTypes = _lexemeTypes[lexemeIndex];
 
         for (var i = 0; i < astNodes.Count; i++)

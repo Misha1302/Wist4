@@ -7,9 +7,16 @@ main() -> i64 (
     Vector3 vec2.new(7.0, 6.0, 5.0)
     Vector3 vec3.add2(vec1, vec2)
     
-    /*if (f64 q = vec1:x + vec2:x; q == 10.0) (
-        printF64(q)
-    )*/
+    f64 w = vec1:x + vec2:x
+    if (f64 q = w + w + w + w + w + w + w + w + w + w; q == 100.0) (
+        printF64(q + 0.11111)
+    )
+    
+    printF64(q - 0.1)
+    printI64(0.1 + 0.2 == 0.3)
+    printI64(0.2 + 0.2 == 0.4)
+    printF64(0.3 / 0.5)
+    printF64(0.3 - 0.5)
     
     vec3.print()
 

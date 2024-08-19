@@ -1,7 +1,7 @@
+import "CodeExamples/StdLib"
+
 import many "CodeExamples/StdLib/Generics" with T=i64 T2=i64
 import many "CodeExamples/StdLib/Generics" with T=f64 T2=f64
-import "CodeExamples/StdLib/BaseFunctions"
-import "CodeExamples/StdLib/StdMacroses"
     
 
 main() -> i64 (

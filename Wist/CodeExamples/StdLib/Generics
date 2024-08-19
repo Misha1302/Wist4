@@ -1,3 +1,9 @@
+#ifdef T
+#ifdef T2
+
 sum:T(T a, T2 b) -> T (
     ret a + b
 )
+
+#endif
+#endif

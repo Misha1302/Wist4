@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Principal;
+using System.Text;
 using Wist.Backend;
 using Wist.Statistics.Logger;
 
@@ -108,7 +109,7 @@ public class GccPreprocessor(ILogger logger) : IPreprocessor
 
     private static string StdPreprocess(string input)
     {
-        input = new StdImportsPreprocessor().Preprocess(input, []);
+        input = new StdImportsPreprocessor().Preprocess(new StringBuilder(input), []);
         return input;
     }
 }

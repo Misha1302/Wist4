@@ -26,6 +26,9 @@
         <None Update="CodeExamples\StdLib\StdMacroses">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="CodeExamples\StdLib\Generics">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
